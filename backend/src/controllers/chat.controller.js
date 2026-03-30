@@ -36,21 +36,34 @@ const normalizeChannelId = (channelId) => {
 const getChannelById = async (channelId) => {
   const normalized = normalizeChannelId(channelId);
 
-  // Prefer `cid` filter because Stream returns cid format as "messaging:<id>"
-  const channelsByCid = await streamClient.queryChannels(
+  // Try exact ID match first
+  const byId = await streamClient.queryChannels(
+    { type: "messaging", id: normalized },
+    { last_message_at: -1 },
+    { limit: 1, state: true }
+  );
+  if (byId?.length) return byId[0];
+
+  // Try by name (case-insensitive partial match)
+  const byName = await streamClient.queryChannels(
+    { type: "messaging", name: { $autocomplete: channelId.trim() } },
+    { last_message_at: -1 },
+    { limit: 5, state: true }
+  );
+  // Return first public result
+  const publicByName = byName?.find(ch => {
+    const d = ch.data || {};
+    return !d.private && (d.visibility === "public" || d.discoverable === true);
+  });
+  if (publicByName) return publicByName;
+
+  // Fallback: cid format
+  const byCid = await streamClient.queryChannels(
     { cid: { $eq: `messaging:${normalized}` } },
     { last_message_at: -1 },
     { limit: 1, state: true }
   );
-  if (channelsByCid?.length) return channelsByCid[0];
-
-  // Fallback to `id`
-  const channelsById = await streamClient.queryChannels(
-    { id: normalized, type: "messaging" },
-    { last_message_at: -1 },
-    { limit: 1, state: true }
-  );
-  return channelsById?.[0] ?? null;
+  return byCid?.[0] ?? null;
 };
 
 export const getPublicChannel = async (req, res) => {
@@ -58,67 +71,55 @@ export const getPublicChannel = async (req, res) => {
     const userId = req.auth().userId;
     const channelId = req.params.channelId;
 
-    const channel = await getChannelById(channelId);
-    if (!channel) return res.status(404).json({ message: "Channel not found" });
+    // Search by both ID and name — collect all public matches
+    const normalized = normalizeChannelId(channelId);
+    const rawQuery = channelId.trim();
 
-    const isPrivate = Boolean(channel.data?.private || channel.data?.visibility === "private" || channel.private);
-    const isPublic = !isPrivate && (channel.data?.visibility === "public" || channel.data?.discoverable === true);
-    if (!isPublic) return res.status(403).json({ message: "Channel is not public" });
+    // Query by ID
+    const byId = await streamClient.queryChannels(
+      { type: "messaging", id: normalized },
+      { last_message_at: -1 },
+      { limit: 1, state: true }
+    ).catch(() => []);
 
-    // Check if user is already a member
-    const isMember = channel.state.members[userId];
+    // Query by name autocomplete
+    const byName = await streamClient.queryChannels(
+      { type: "messaging", name: { $autocomplete: rawQuery } },
+      { last_message_at: -1 },
+      { limit: 10, state: true }
+    ).catch(() => []);
 
-    // For non-members, create a temporary client instance to fetch messages
-    let messages = [];
-    try {
-      if (isMember) {
-        // User is a member, fetch messages normally
-        const messageResponse = await channel.query({
-          messages: { limit: 50 },
-          members: { limit: 100 },
-        });
-        messages = messageResponse.messages || [];
-      } else {
-        // User is not a member, fetch messages as a guest
-        // We need to create a guest token for this operation
-        const guestToken = streamClient.createGuestToken();
-        const guestClient = new StreamChat(streamClient.apiKey, streamClient.apiSecret);
-        await guestClient.connectUser({ id: 'guest_' + Date.now() }, guestToken);
-        
-        const guestChannel = guestClient.channel('messaging', channel.id);
-        await guestChannel.watch();
-        
-        const messageResponse = await guestChannel.query({
-          messages: { limit: 50 },
-        });
-        messages = messageResponse.messages || [];
-        
-        await guestClient.disconnectUser();
-      }
-    } catch (messageError) {
-      console.log("Error fetching messages:", messageError);
-      // Continue without messages if there's an error
+    // Merge, deduplicate, filter public only
+    const seen = new Set();
+    const candidates = [...byId, ...byName].filter(ch => {
+      if (seen.has(ch.id)) return false;
+      seen.add(ch.id);
+      const d = ch.data || {};
+      const isPrivate = d.private || d.visibility === "private";
+      return !isPrivate && (d.visibility === "public" || d.discoverable === true);
+    });
+
+    if (!candidates.length) {
+      return res.status(404).json({ message: "No public channel found" });
     }
 
-    // Return channel info with messages
-    return res.status(200).json({ 
+    // Return the best match (exact ID match first, then first name match)
+    const channel = candidates.find(c => c.id === normalized) || candidates[0];
+    const isMember = !!channel.state.members[userId];
+
+    return res.status(200).json({
       channelId: channel.id,
       name: channel.data?.name || channel.id,
-      description: channel.data?.description || '',
+      description: channel.data?.description || "",
       memberCount: Object.keys(channel.state.members || {}).length,
-      isMember: !!isMember,
-      messages: messages.map(msg => ({
-        id: msg.id,
-        text: msg.text,
-        user: {
-          id: msg.user?.id,
-          name: msg.user?.name || msg.user?.id,
-          image: msg.user?.image
-        },
-        created_at: msg.created_at,
-        type: msg.type,
-        attachments: msg.attachments || []
-      }))
+      isMember,
+      // Also return other matches so frontend can show a list
+      otherMatches: candidates.slice(1).map(c => ({
+        channelId: c.id,
+        name: c.data?.name || c.id,
+        memberCount: Object.keys(c.state.members || {}).length,
+        isMember: !!c.state.members[userId],
+      })),
     });
   } catch (error) {
     console.log("Error getting public channel:", error);

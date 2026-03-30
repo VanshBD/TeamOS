@@ -1,103 +1,137 @@
 import { useState } from "react";
 import { useChatContext } from "stream-chat-react";
-import { useUser } from "@clerk/clerk-react";
 import { useSearchParams } from "react-router";
-
 import { getPublicChannel, joinPublicChannel } from "../lib/api";
-import PublicChannelPreview from "./PublicChannelPreview";
-
-const normalizeChannelId = (channelId) =>
-  String(channelId || "")
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, "-")
-    .replace(/[^a-z0-9-_]/g, "")
-    .slice(0, 20);
+import { SearchIcon, HashIcon, UsersIcon, LogInIcon } from "lucide-react";
 
 const PublicChannelJoin = () => {
   const { client } = useChatContext();
-  const { user } = useUser();
   const [, setSearchParams] = useSearchParams();
 
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
-  const [foundChannel, setFoundChannel] = useState(null);
+  const [results, setResults] = useState([]); // array of channel matches
   const [error, setError] = useState("");
+  const [joiningId, setJoiningId] = useState(null);
 
   const handleSearch = async () => {
-    if (!query.trim()) return;
+    const q = query.trim();
+    if (!q) return;
     setLoading(true);
     setError("");
-    setFoundChannel(null);
+    setResults([]);
 
     try {
-      const normalized = normalizeChannelId(query);
-      const result = await getPublicChannel(normalized);
-      if (!result?.channelId) {
-        setError("Public channel not found.");
-        return;
-      }
-      setFoundChannel(result);
+      const data = await getPublicChannel(encodeURIComponent(q));
+      if (!data?.channelId) { setError("No public channel found."); return; }
+
+      // Build full results list: primary + otherMatches
+      const all = [
+        { channelId: data.channelId, name: data.name, memberCount: data.memberCount, isMember: data.isMember },
+        ...(data.otherMatches || []),
+      ];
+      setResults(all);
     } catch (err) {
-      setError(err?.response?.data?.message || "Public channel not found.");
+      setError(err?.response?.data?.message || "No public channel found.");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleJoin = async () => {
-    if (!foundChannel?.channelId || !user?.id) return;
-    setLoading(true);
+  const handleJoin = async (channelId) => {
+    setJoiningId(channelId);
     setError("");
     try {
-      await joinPublicChannel(foundChannel.channelId);
-
-      // After joining, watch the channel and open it in the UI.
-      const channel = client.channel("messaging", foundChannel.channelId);
-      await channel.watch();
-      setSearchParams({ channel: foundChannel.channelId });
-      
-      // Clear the search state
-      setFoundChannel(null);
+      await joinPublicChannel(channelId);
+      const ch = client.channel("messaging", channelId);
+      await ch.watch();
+      setSearchParams({ channel: channelId });
+      setResults([]);
       setQuery("");
     } catch (err) {
       setError(err?.response?.data?.message || "Failed to join channel.");
     } finally {
-      setLoading(false);
+      setJoiningId(null);
+    }
+  };
+
+  const handleOpen = async (channelId) => {
+    try {
+      const ch = client.channel("messaging", channelId);
+      await ch.watch();
+      setSearchParams({ channel: channelId });
+      setResults([]);
+      setQuery("");
+    } catch {
+      setError("Failed to open channel.");
     }
   };
 
   return (
-    <div className="mt-4 px-4">
-      <div className="text-sm font-semibold text-[#ffffffcc] mb-2">Join Public Channel</div>
-      <div className="flex gap-2">
-        <input
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Enter channel id"
-          className="flex-1 px-3 py-2 rounded-lg bg-white/10 border border-white/10 text-white outline-none"
-          onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-        />
+    <div className="pub-search">
+      <p className="pub-search__label">Join Public Channel</p>
+
+      <div className="pub-search__row">
+        <div className="pub-search__input-wrap">
+          <SearchIcon className="pub-search__input-icon" />
+          <input
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+            onKeyDown={e => e.key === "Enter" && handleSearch()}
+            placeholder="Search by name or ID…"
+            className="pub-search__input"
+          />
+        </div>
         <button
           onClick={handleSearch}
           disabled={loading || !query.trim()}
-          className="px-3 py-2 rounded-lg bg-[#611f69] hover:bg-[#4f1655] text-white text-sm font-medium disabled:opacity-60"
+          className="pub-search__btn"
         >
-          {loading ? "..." : "Search"}
+          {loading ? <span className="pub-search__spinner" /> : "Search"}
         </button>
       </div>
-      {error && <div className="text-xs text-red-200 mt-2">{error}</div>}
 
-      {foundChannel && (
-        <PublicChannelPreview 
-          channelData={foundChannel} 
-          onJoin={handleJoin}
-          loading={loading}
-        />
+      {error && <p className="pub-search__error">{error}</p>}
+
+      {results.length > 0 && (
+        <div className="pub-search__results">
+          {results.map(ch => (
+            <div key={ch.channelId} className="pub-search__result">
+              <div className="pub-search__result-info">
+                <HashIcon className="pub-search__result-icon" />
+                <div>
+                  <p className="pub-search__result-name">{ch.name}</p>
+                  <p className="pub-search__result-meta">
+                    <UsersIcon className="w-3 h-3 inline mr-1" />
+                    {ch.memberCount} member{ch.memberCount !== 1 ? "s" : ""}
+                  </p>
+                </div>
+              </div>
+              {ch.isMember ? (
+                <button
+                  className="pub-search__result-btn pub-search__result-btn--open"
+                  onClick={() => handleOpen(ch.channelId)}
+                >
+                  Open
+                </button>
+              ) : (
+                <button
+                  className="pub-search__result-btn pub-search__result-btn--join"
+                  onClick={() => handleJoin(ch.channelId)}
+                  disabled={joiningId === ch.channelId}
+                >
+                  {joiningId === ch.channelId
+                    ? <span className="pub-search__spinner pub-search__spinner--sm" />
+                    : <><LogInIcon className="w-3 h-3" /> Join</>
+                  }
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
       )}
     </div>
   );
 };
 
 export default PublicChannelJoin;
-

@@ -1,0 +1,68 @@
+/* ═══════════════════════════════════════════════════════════
+   TEAMOS — DESIGN TOKENS
+   ═══════════════════════════════════════════════════════════ */
+:root {
+  /* Core palette */
+  --bg-base:        #080810;
+  --bg-surface:     #0f0f1a;
+  --bg-elevated:    #16162a;
+  --bg-overlay:     #1c1c32;
+  --bg-hover:       rgba(109,40,217,.12);
+  --bg-active:      rgba(109,40,217,.22);
+
+  /* Glass */
+  --glass-bg:       rgba(255,255,255,.04);
+  --glass-border:   rgba(255,255,255,.08);
+  --glass-blur:     blur(20px);
+
+  /* Brand */
+  --purple-500:     #6d28d9;
+  --purple-400:     #7c3aed;
+  --purple-300:     #9333ea;
+  --blue-500:       #2563eb;
+  --blue-400:       #3b82f6;
+  --cyan-400:       #22d3ee;
+
+  /* Gradients */
+  --grad-brand:     linear-gradient(135deg, #6d28d9 0%, #9333ea 50%, #2563eb 100%);
+  --grad-purple:    linear-gradient(135deg, #6d28d9, #9333ea);
+  --grad-blue:      linear-gradient(135deg, #2563eb, #3b82f6);
+  --grad-glow:      linear-gradient(135deg, rgba(109,40,217,.3), rgba(37,99,235,.3));
+
+  /* Text */
+  --text-primary:   #f1f0ff;
+  --text-secondary: #a09ec0;
+  --text-muted:     #5c5a7a;
+  --text-accent:    #9333ea;
+
+  /* Status */
+  --green:          #22c55e;
+  --red:            #ef4444;
+  --amber:          #f59e0b;
+
+  /* Borders */
+  --border-subtle:  rgba(255,255,255,.06);
+  --border-default: rgba(255,255,255,.1);
+  --border-accent:  rgba(109,40,217,.5);
+  --border-glow:    rgba(109,40,217,.8);
+
+  /* Shadows */
+  --shadow-sm:      0 2px 8px rgba(0,0,0,.4);
+  --shadow-md:      0 8px 32px rgba(0,0,0,.5);
+  --shadow-lg:      0 20px 60px rgba(0,0,0,.6);
+  --shadow-glow:    0 0 20px rgba(109,40,217,.35);
+  --shadow-glow-lg: 0 0 40px rgba(109,40,217,.25), 0 0 80px rgba(37,99,235,.15);
+
+  /* Radius */
+  --r-sm:  8px;
+  --r-md:  12px;
+  --r-lg:  16px;
+  --r-xl:  20px;
+  --r-2xl: 24px;
+  --r-full: 999px;
+
+  /* Transitions */
+  --t-fast:   all .15s cubic-bezier(.4,0,.2,1);
+  --t-smooth: all .25s cubic-bezier(.4,0,.2,1);
+  --t-spring: all .3s cubic-bezier(.34,1.56,.64,1);
+}
