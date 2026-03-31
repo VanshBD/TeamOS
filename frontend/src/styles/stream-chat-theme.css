@@ -2,7 +2,15 @@
 @import "./design-tokens.css";
 @import "./attachment-modal.css";
 @import "./core-layout.css";
+@import "./core-layout-2.css";
 @import "./teamos-ui.css";
+@import "./polish.css";
+@import "./visibility-fix.css";
+@import "./visibility-fix-2.css";
+@import "./visibility-fix-3.css";
+@import "./visibility-fix-4.css";
+@import "./chat-space-fix.css";
+@import "./layout-final-fix.css";
 
 :root {
   --primary-color: #4a154b;
@@ -22,54 +30,30 @@
   --spacing-xl: 32px;
 }
 
-/* Chat Wrapper & Container */
+/* Chat Wrapper & Container — OVERRIDDEN by core-layout.css */
 .chat-wrapper {
-  min-height: 100vh;
-  background: linear-gradient(
-      125deg,
-      #1a0b2e 0%,
-      #16213e 25%,
-      #0f3460 50%,
-      #533483 75%,
-      #7209b7 100%
-    ),
-    radial-gradient(ellipse at top left, rgba(116, 58, 213, 0.15) 0%, transparent 50%),
-    radial-gradient(ellipse at bottom right, rgba(74, 21, 75, 0.15) 0%, transparent 50%);
-  padding: 2rem;
-  position: relative;
+  height: 100vh;
+  padding: 0;
   overflow: hidden;
+  display: flex;
+  background: #080810;
 }
 
-.chat-wrapper::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-image: radial-gradient(1px 1px at 25px 35px, rgba(116, 58, 213, 0.4), transparent),
-    radial-gradient(1px 1px at 85px 75px, rgba(74, 21, 75, 0.3), transparent),
-    radial-gradient(1px 1px at 145px 45px, rgba(114, 9, 183, 0.3), transparent);
-  background-repeat: repeat;
-  background-size: 250px 120px;
-  pointer-events: none;
-  opacity: 0.6;
-}
+.chat-wrapper::before { display: none; }
 
 .chat-container {
-  max-width: 1400px;
-  margin: 0 auto;
-  height: calc(100vh - 4rem);
+  width: 100%;
+  max-width: 100%;
+  height: 100vh;
+  margin: 0;
   display: flex;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 2rem;
-  backdrop-filter: blur(25px);
-  border: 1px solid rgba(116, 58, 213, 0.2);
-  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3), 0 0 100px rgba(116, 58, 213, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
   overflow: hidden;
+  border-radius: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
   position: relative;
-  z-index: 2;
+  z-index: 1;
 }
 
 /* Layout */
@@ -699,10 +683,11 @@
 }
 
 .chat-main {
-  flex: 1;
-  background: rgba(255, 255, 255, 0.98);
-  border-radius: 0 2rem 2rem 0;
+  flex: 1 1 0;
+  min-width: 0;
+  background: #0f1117;
   overflow: hidden;
+  border-radius: 0;
 }
 
 .radio-option {
@@ -966,64 +951,16 @@
   font-style: italic;
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-  .chat-wrapper {
-    padding: 1rem;
-  }
-
-  .chat-container {
-    height: calc(100vh - 2rem);
-    border-radius: 1rem;
-  }
-
-  .str-chat__channel-list {
-    width: 280px;
-  }
-
-  .brand-name {
-    font-size: 1.25rem;
-  }
-
-  .brand-logo {
-    width: 2rem;
-    height: 2rem;
-  }
-
-  .team-channel-list__header {
-    padding: 1rem;
-  }
-
-  .create-channel-section {
-    padding: 0.75rem 1rem;
-  }
-
-  .chat-main {
-    border-radius: 0 1rem 1rem 0;
-  }
+/* Responsive Design — handled by chat-space-fix.css */
+@media (max-width: 899px) {
+  .chat-wrapper { padding: 0; }
+  .chat-container { height: 100vh; border-radius: 0; }
+  .chat-main { border-radius: 0; }
 }
-
 @media (max-width: 640px) {
-  .chat-wrapper {
-    padding: 0.5rem;
-  }
-
-  .chat-container {
-    height: calc(100vh - 1rem);
-    flex-direction: column;
-    border-radius: 0.75rem;
-  }
-
-  .str-chat__channel-list {
-    width: 100%;
-    height: 200px;
-    border-right: none;
-    border-bottom: 1px solid rgba(116, 58, 213, 0.3);
-  }
-
-  .chat-main {
-    border-radius: 0 0 0.75rem 0.75rem;
-  }
+  .chat-wrapper { padding: 0; }
+  .chat-container { height: 100vh; flex-direction: row; border-radius: 0; }
+  .chat-main { border-radius: 0; }
 }
 
 /* ── Call Card (replaces old call-message-card) ────────────── */

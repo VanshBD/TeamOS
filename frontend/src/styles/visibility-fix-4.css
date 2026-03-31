@@ -1,0 +1,106 @@
+/* ═══════════════════════════════════════════════════════════
+   TEAMOS — VISIBILITY FIX PART 4
+   Empty state, file attachments, misc text fixes
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── EMPTY STATE ────────────────────────────────────────── */
+.str-chat__empty-channel {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  height: 100% !important;
+  padding: 40px 20px !important;
+  background: transparent !important;
+  animation: emptyFadeIn .4s ease-out !important;
+}
+@keyframes emptyFadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.str-chat__empty-channel::before {
+  content: "💬";
+  font-size: 48px;
+  margin-bottom: 16px;
+  filter: drop-shadow(0 0 16px rgba(109,40,217,.4));
+  animation: emptyFloat 3s ease-in-out infinite;
+}
+@keyframes emptyFloat {
+  0%,100% { transform: translateY(0); }
+  50%      { transform: translateY(-6px); }
+}
+.str-chat__empty-channel p,
+.str-chat__empty-channel span {
+  color: #9CA3AF !important;
+  font-size: 14px !important;
+  text-align: center !important;
+  max-width: 280px !important;
+  line-height: 1.6 !important;
+}
+/* Override Stream's default empty state text */
+.str-chat__empty-channel .str-chat__empty-channel-text {
+  color: #6B7280 !important;
+  font-size: 13px !important;
+}
+
+/* Custom empty state for when no channel is selected */
+.chat-main .str-chat__channel:not(:has(.str-chat__message-list)) {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* ── FILE ATTACHMENT ────────────────────────────────────── */
+.msg-attachment-file { background: #1e2a3a !important; border-color: rgba(37,99,235,.2) !important; }
+.msg-attachment-file__name { color: #93c5fd !important; }
+.msg-attachment-file__size { color: #6B7280 !important; }
+.msg-attachment-file__dl { color: #60a5fa !important; }
+.msg-attachment-file--own { background: rgba(255,255,255,.12) !important; border-color: rgba(255,255,255,.2) !important; }
+.msg-attachment-file--own .msg-attachment-file__name { color: #fff !important; }
+.msg-attachment-file--own .msg-attachment-file__size { color: rgba(255,255,255,.5) !important; }
+
+/* ── ATTACHMENT PREVIEW STRIP ───────────────────────────── */
+.attachment-preview-item__file,
+.attachment-preview-item__location { color: #D1D5DB !important; }
+.attachment-preview-item__filename { color: #D1D5DB !important; }
+
+/* ── PINNED MESSAGES MODAL ──────────────────────────────── */
+.pinned-banner__label { color: #a78bfa !important; font-size: 9px !important; }
+.pinned-banner__text { color: #D1D5DB !important; }
+
+/* ── INCOMING CALL POPUP ────────────────────────────────── */
+/* Already inline styles — ensure text is visible */
+.incoming-call-popup p { color: #F9FAFB !important; }
+
+/* ── STREAM THREAD PANEL ────────────────────────────────── */
+.str-chat__thread { background: #0d0d1a !important; }
+.str-chat__thread-header-title { color: #F9FAFB !important; }
+.str-chat__thread-header { background: #0a0a12 !important; border-color: rgba(255,255,255,.07) !important; }
+
+/* ── STREAM TYPING INDICATOR ────────────────────────────── */
+.str-chat__typing-indicator__avatars { color: #9CA3AF !important; }
+.str-chat__typing-indicator__dots span { background: #9CA3AF !important; }
+
+/* ── STREAM MESSAGE NOTIFICATION ───────────────────────── */
+.str-chat__message-notification { background: #1d4ed8 !important; color: #fff !important; }
+
+/* ── MISC TEXT FIXES ────────────────────────────────────── */
+/* Any remaining gray text on dark bg */
+.text-gray-500 { color: #9CA3AF !important; }
+.text-gray-400 { color: #9CA3AF !important; }
+.text-gray-600 { color: #D1D5DB !important; }
+.text-gray-700 { color: #D1D5DB !important; }
+.text-gray-900 { color: #F9FAFB !important; }
+.text-gray-800 { color: #F9FAFB !important; }
+
+/* Ensure no invisible text on dark backgrounds */
+.bg-white .text-gray-900 { color: #111827 !important; }
+.bg-white .text-gray-700 { color: #374151 !important; }
+.bg-white .text-gray-500 { color: #6B7280 !important; }
+
+/* ── LOADING STATES ─────────────────────────────────────── */
+.loading-message { color: #9CA3AF !important; }
+.error-message { color: #fca5a5 !important; }
+
+/* ── SELECTION ──────────────────────────────────────────── */
+::selection { background: rgba(109,40,217,.4) !important; color: #F9FAFB !important; }

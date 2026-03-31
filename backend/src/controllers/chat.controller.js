@@ -2,6 +2,75 @@ import { generateStreamToken, upsertStreamUser, streamClient } from "../config/s
 import { clerkClient } from "@clerk/express";
 import { StreamChat } from "stream-chat";
 
+export const getCallHistory = async (req, res) => {
+  try {
+    const userId = req.auth().userId;
+    const { channelId } = req.params;
+
+    const channels = await streamClient.queryChannels(
+      { type: "messaging", id: channelId },
+      {},
+      { limit: 1, state: true, message_limit: 300 }
+    );
+    if (!channels?.length) return res.status(404).json({ message: "Channel not found" });
+
+    const channel = channels[0];
+    const messages = Object.values(channel.state?.messages || {});
+
+    // Extract all __CALL__ messages
+    const callMsgs = messages.filter(m => m.text?.startsWith("__CALL__"));
+
+    // Group by callId — build a map of callId → { started, ended, missed }
+    const callMap = {};
+    for (const msg of callMsgs) {
+      try {
+        const data = JSON.parse(msg.text.replace("__CALL__", ""));
+        const { callId } = data;
+        if (!callId) continue;
+        if (!callMap[callId]) callMap[callId] = { callId, messages: [] };
+        callMap[callId].messages.push({ ...data, _msgId: msg.id, _userId: msg.user?.id, _userName: msg.user?.name, _userImage: msg.user?.image, _createdAt: msg.created_at });
+      } catch { /* skip malformed */ }
+    }
+
+    // Build call records
+    const calls = [];
+    for (const [callId, { messages: cMsgs }] of Object.entries(callMap)) {
+      const started = cMsgs.find(m => m.status === "started" && !m.ended);
+      const ended = cMsgs.find(m => m.ended || m.status === "ended");
+      const missed = cMsgs.find(m => m.status === "missed");
+
+      if (!started) continue; // skip orphaned ended/missed without a start
+
+      const startTime = started.startTime || started._createdAt;
+      const endTime = ended?.endTime || ended?._createdAt || null;
+      const durationSec = startTime && endTime
+        ? Math.max(0, Math.floor((new Date(endTime) - new Date(startTime)) / 1000))
+        : null;
+
+      calls.push({
+        callId,
+        status: missed ? "missed" : ended ? "ended" : "active",
+        startTime,
+        endTime,
+        durationSec,
+        createdBy: {
+          id: started._userId,
+          name: started._userName || started._userId,
+          image: started._userImage || null,
+        },
+      });
+    }
+
+    // Sort newest first
+    calls.sort((a, b) => new Date(b.startTime) - new Date(a.startTime));
+
+    return res.status(200).json({ calls });
+  } catch (err) {
+    console.error("getCallHistory error:", err);
+    return res.status(500).json({ message: "Failed to get call history" });
+  }
+};
+
 export const getStreamToken = async (req, res) => {
   try {
     const userId = req.auth().userId;
@@ -220,5 +289,90 @@ export const unpinMessage = async (req, res) => {
   } catch (error) {
     console.log("Error unpinning message:", error?.message || error);
     return res.status(500).json({ message: "Failed to unpin message", detail: error?.message });
+  }
+};
+
+// Vote on a poll — uses server-side admin client so any channel member can vote
+export const votePoll = async (req, res) => {
+  try {
+    const userId = req.auth().userId;
+    const { messageId } = req.params;
+    const { optionId, userName, multiSelect } = req.body;
+
+    if (!optionId) return res.status(400).json({ message: "optionId is required" });
+
+    // Fetch the current message using server-side admin client
+    const { message } = await streamClient.getMessage(messageId);
+    if (!message) return res.status(404).json({ message: "Message not found" });
+
+    // Get current poll from attachments
+    const attachments = Array.isArray(message.attachments) ? message.attachments : [];
+    const pollAttIdx = attachments.findIndex(a => a.type === "poll");
+
+    // Also check legacy top-level poll field and poll_data backup
+    let currentPoll = null;
+    if (pollAttIdx !== -1) {
+      const raw = attachments[pollAttIdx].poll;
+      currentPoll = typeof raw === "string" ? JSON.parse(raw) : raw;
+    } else if (message.poll_data) {
+      const raw = message.poll_data;
+      currentPoll = typeof raw === "string" ? JSON.parse(raw) : raw;
+    } else if (message.poll) {
+      // Note: message.poll may be Stream's native Poll object, not our custom one
+      // Only use it if it has our expected shape (has 'options' array)
+      const raw = message.poll;
+      const parsed = typeof raw === "string" ? JSON.parse(raw) : raw;
+      if (parsed?.options) currentPoll = parsed;
+    }
+
+    if (!currentPoll) return res.status(400).json({ message: "No poll found in message" });
+
+    // Update votes
+    const votes = JSON.parse(JSON.stringify(currentPoll.votes || {}));
+    const alreadyVoted = (votes[optionId] || []).some(v => v.userId === userId);
+
+    if (alreadyVoted) {
+      votes[optionId] = (votes[optionId] || []).filter(v => v.userId !== userId);
+    } else {
+      if (!multiSelect) {
+        Object.keys(votes).forEach(k => {
+          votes[k] = (votes[k] || []).filter(v => v.userId !== userId);
+        });
+      }
+      votes[optionId] = [
+        ...(votes[optionId] || []),
+        { userId, userName: userName || userId },
+      ];
+    }
+
+    const updatedPoll = { ...currentPoll, votes };
+
+    // Build updated attachments
+    let newAttachments;
+    if (pollAttIdx !== -1) {
+      newAttachments = attachments.map((a, i) =>
+        i === pollAttIdx ? { ...a, poll: updatedPoll } : a
+      );
+    } else {
+      // Legacy: add poll attachment
+      newAttachments = [...attachments, { type: "poll", poll: updatedPoll, title: updatedPoll.question }];
+    }
+
+    // Use updateMessage via server-side admin client.
+    // Only send the minimal required fields to avoid Stream rejecting reserved fields.
+    // IMPORTANT: Do NOT include 'poll' field — it's reserved by Stream's native Poll feature.
+    const updatePayload = {
+      id: message.id,
+      text: message.text || `📊 Poll: ${updatedPoll.question}`,
+      attachments: newAttachments,
+      poll_data: updatedPoll,   // store in non-reserved custom field as backup
+    };
+
+    await streamClient.updateMessage(updatePayload, userId);
+
+    return res.status(200).json({ ok: true, poll: updatedPoll });
+  } catch (error) {
+    console.error("Vote poll error full:", JSON.stringify(error?.response?.data || error?.message || error));
+    return res.status(500).json({ message: "Failed to record vote", detail: error?.response?.data?.message || error?.message });
   }
 };

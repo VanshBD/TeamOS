@@ -5,6 +5,7 @@ import { clerkMiddleware } from "@clerk/express";
 import { functions, inngest } from "./config/inngest.js";
 import { serve } from "inngest/express";
 import chatRoutes from "./routes/chat.route.js";
+import friendRoutes from "./routes/friend.route.js";
 
 import cors from "cors";
 
@@ -26,6 +27,7 @@ app.get("/", (req, res) => {
 
 app.use("/api/inngest", serve({ client: inngest, functions }));
 app.use("/api/chat", chatRoutes);
+app.use("/api/friends", friendRoutes);
 
 Sentry.setupExpressErrorHandler(app);
 

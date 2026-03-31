@@ -6,6 +6,8 @@ import {
   joinPublicChannel,
   pinMessage,
   unpinMessage,
+  votePoll,
+  getCallHistory,
 } from "../controllers/chat.controller.js";
 import { protectRoute } from "../middleware/auth.middleware.js";
 
@@ -21,4 +23,9 @@ router.post("/channels/:channelId/invite", protectRoute, inviteMembersToPrivateC
 router.post("/messages/:messageId/pin", protectRoute, pinMessage);
 router.post("/messages/:messageId/unpin", protectRoute, unpinMessage);
 
+// Poll vote — requires server-side admin client (users can't partialUpdateMessage on others' messages)
+router.post("/messages/:messageId/vote", protectRoute, votePoll);
+
 export default router;
+
+router.get("/channels/:channelId/call-history", protectRoute, getCallHistory);

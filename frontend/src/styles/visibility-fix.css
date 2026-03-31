@@ -1,0 +1,119 @@
+/* ═══════════════════════════════════════════════════════════
+   TEAMOS — VISIBILITY & CONTRAST FIX
+   Highest specificity layer — loaded last
+   ═══════════════════════════════════════════════════════════
+
+   TEXT SYSTEM:
+   --t1: #F9FAFB  primary   (headings, message text, names)
+   --t2: #D1D5DB  secondary (labels, descriptions)
+   --t3: #9CA3AF  muted     (timestamps, placeholders)
+   --t4: #6B7280  disabled  (hints, inactive)
+   ═══════════════════════════════════════════════════════════ */
+
+:root {
+  --t1: #F9FAFB;
+  --t2: #D1D5DB;
+  --t3: #9CA3AF;
+  --t4: #6B7280;
+  --bg-chat:    #0f1117;
+  --bg-sidebar: #0a0a12;
+  --bg-input:   #111827;
+  --bg-bubble-other: #1e2130;
+  --bg-modal:   #0f172a;
+}
+
+/* ── GLOBAL BASE ────────────────────────────────────────── */
+body { background: var(--bg-chat) !important; color: var(--t1) !important; }
+
+/* ── CHAT AREA BACKGROUND ───────────────────────────────── */
+.chat-main {
+  background: var(--bg-chat) !important;
+}
+.chat-main .str-chat__list,
+.chat-main .str-chat__message-list-scroll {
+  background: var(--bg-chat) !important;
+}
+
+/* ── SIDEBAR ────────────────────────────────────────────── */
+.sidebar { background: var(--bg-sidebar) !important; }
+
+/* Channel names — readable */
+.channel-preview-item__name {
+  color: var(--t2) !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+}
+.channel-preview-item:hover .channel-preview-item__name { color: var(--t1) !important; }
+.channel-preview-item--active .channel-preview-item__name {
+  color: var(--t1) !important;
+  font-weight: 600 !important;
+}
+
+/* DM names */
+.dm-item__name { color: var(--t2) !important; }
+.dm-item:hover .dm-item__name { color: var(--t1) !important; }
+.dm-item--active .dm-item__name { color: var(--t1) !important; font-weight: 600 !important; }
+
+/* Section headers */
+.sidebar__section-header { color: var(--t4) !important; }
+
+/* Status messages */
+.sidebar-status-msg { color: var(--t3) !important; }
+
+/* Brand name */
+.brand-name { color: var(--t1) !important; }
+
+/* Show more button */
+.sidebar__show-more { color: var(--t3) !important; }
+.sidebar__show-more:hover { color: var(--t2) !important; }
+
+/* ── MESSAGE BUBBLES ────────────────────────────────────── */
+
+/* Own messages — solid gradient, white text */
+.msg-bubble--own {
+  background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 60%, #3b82f6 100%) !important;
+  border: 1px solid rgba(59,130,246,.3) !important;
+}
+.msg-bubble--own .msg-text {
+  color: #ffffff !important;
+  font-size: 14px !important;
+  line-height: 1.55 !important;
+}
+.msg-bubble__time { color: rgba(255,255,255,.55) !important; }
+
+/* Other messages — solid dark bubble, light text */
+.msg-bubble--other {
+  background: var(--bg-bubble-other) !important;
+  border: 1px solid rgba(255,255,255,.07) !important;
+  backdrop-filter: none !important;
+}
+.msg-bubble--other .msg-text {
+  color: var(--t1) !important;
+  font-size: 14px !important;
+  line-height: 1.55 !important;
+}
+
+/* Sender name */
+.msg-meta__name { color: #a78bfa !important; font-weight: 600 !important; font-size: 12px !important; }
+
+/* Timestamp */
+.msg-meta__time { color: var(--t4) !important; font-size: 10px !important; }
+
+/* Pin badge */
+.msg-pin-badge { color: var(--t3) !important; }
+
+/* ── QUOTED REPLY ────────────────────────────────────────── */
+.quoted-reply__name { color: #93c5fd !important; }
+.quoted-reply__text { color: var(--t3) !important; }
+.msg-bubble--own .quoted-reply__name { color: rgba(255,255,255,.8) !important; }
+.msg-bubble--own .quoted-reply__text { color: rgba(255,255,255,.55) !important; }
+
+/* ── HOVER ACTIONS ──────────────────────────────────────── */
+.msg-action-btn { color: var(--t3) !important; }
+.msg-action-btn:hover { color: var(--t1) !important; }
+
+/* ── REPLY COUNT ─────────────────────────────────────────── */
+.msg-reply-count { color: #93c5fd !important; }
+
+/* ── DATE SEPARATOR ─────────────────────────────────────── */
+.str-chat__date-separator-date { color: var(--t4) !important; }

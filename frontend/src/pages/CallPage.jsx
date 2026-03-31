@@ -142,17 +142,22 @@ const CallPage = () => {
 
   if (!isLoaded || isConnecting) {
     return (
-      <div className="h-screen flex justify-center items-center bg-gray-900 text-white text-lg">
-        Connecting to call...
+      <div style={{ height: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "#080810", gap: 16 }}>
+        <div style={{ position: "relative", width: 56, height: 56 }}>
+          <div style={{ position: "absolute", inset: 0, borderRadius: "50%", border: "2px solid transparent", borderTopColor: "#9333ea", borderRightColor: "#6d28d9", animation: "spin .8s linear infinite" }} />
+          <div style={{ position: "absolute", inset: 8, borderRadius: "50%", background: "linear-gradient(135deg,#6d28d9,#2563eb)", boxShadow: "0 0 20px rgba(109,40,217,.5)" }} />
+        </div>
+        <p style={{ color: "rgba(160,158,192,.8)", fontSize: 14, fontWeight: 500, margin: 0 }}>Connecting to call…</p>
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
     );
   }
 
   if (!client || !call) {
     return (
-      <div className="h-screen flex flex-col gap-4 justify-center items-center bg-gray-900 text-white">
-        <p>Could not initialize call. Please refresh or try again later.</p>
-        <button onClick={closeTab} className="px-4 py-2 bg-red-600 rounded-lg hover:bg-red-700">Close</button>
+      <div style={{ height: "100vh", display: "flex", flexDirection: "column", gap: 16, alignItems: "center", justifyContent: "center", background: "#080810" }}>
+        <p style={{ color: "rgba(241,240,255,.7)", fontSize: 14, margin: 0 }}>Could not initialize call. Please refresh or try again.</p>
+        <button onClick={closeTab} style={{ padding: "10px 20px", background: "linear-gradient(135deg,#dc2626,#b91c1c)", color: "#fff", border: "none", borderRadius: 10, cursor: "pointer", fontSize: 13, fontWeight: 600 }}>Close</button>
       </div>
     );
   }
@@ -321,7 +326,7 @@ const CustomCallControls = ({ isHost, onEndCall }) => {
 
   return (
     <>
-      <div className="flex items-center justify-center gap-3 p-4 bg-gray-900/80 backdrop-blur-sm">
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 12, padding: "16px", background: "rgba(8,8,16,.9)", backdropFilter: "blur(20px)", borderTop: "1px solid rgba(255,255,255,.06)" }}>
         <ToggleAudioPublishingButton />
         <ToggleVideoPublishingButton />
         <ScreenShareButton />

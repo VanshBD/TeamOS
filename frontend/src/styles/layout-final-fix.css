@@ -1,0 +1,205 @@
+/* ═══════════════════════════════════════════════════════════
+   TEAMOS — FINAL LAYOUT FIX (loads last, wins everything)
+   Desktop: sidebar inline, chat fills remaining space
+   Mobile: sidebar overlay, chat full width
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── DESKTOP ≥ 900px ────────────────────────────────────── */
+@media (min-width: 900px) {
+  /* Sidebar: always visible, inline in flex row */
+  .sidebar {
+    position: relative !important;
+    transform: none !important;
+    width: 260px !important;
+    min-width: 260px !important;
+    max-width: 260px !important;
+    height: 100% !important;
+    flex-shrink: 0 !important;
+    z-index: 10 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+  }
+
+  /* Chat main: fills remaining space via flex */
+  .chat-main {
+    flex: 1 1 0 !important;
+    width: 0 !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    height: 100% !important;
+    overflow: hidden !important;
+  }
+
+  .sidebar-overlay,
+  .sidebar-overlay--active {
+    display: none !important;
+  }
+
+  .ch-header__hamburger {
+    display: none !important;
+  }
+
+  .sidebar__close-btn {
+    display: none !important;
+  }
+
+  .msg-content {
+    max-width: min(65%, 520px) !important;
+  }
+}
+
+/* ── MOBILE < 900px ─────────────────────────────────────── */
+@media (max-width: 899px) {
+  .sidebar {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    bottom: 0 !important;
+    width: 280px !important;
+    min-width: 280px !important;
+    max-width: 280px !important;
+    height: 100vh !important;
+    transform: translateX(-100%) !important;
+    transition: transform .28s cubic-bezier(.4,0,.2,1) !important;
+    z-index: 500 !important;
+  }
+
+  .sidebar--open {
+    transform: translateX(0) !important;
+  }
+
+  .chat-main {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    flex: 1 1 0 !important;
+  }
+
+  .ch-header__hamburger {
+    display: flex !important;
+  }
+
+  .sidebar__close-btn {
+    display: flex !important;
+  }
+
+  .msg-content {
+    max-width: 85% !important;
+  }
+
+  .msg-row {
+    padding: 2px 10px !important;
+  }
+}
+
+/* ── VERY SMALL SCREENS ─────────────────────────────────── */
+@media (max-width: 480px) {
+  .sidebar {
+    width: 100vw !important;
+    min-width: 100vw !important;
+    max-width: 100vw !important;
+  }
+
+  .msg-content {
+    max-width: 90% !important;
+  }
+
+  .msg-row {
+    padding: 2px 8px !important;
+  }
+}
+
+/* ── SIDEBAR SCROLLBAR — always hidden (no content = no scrollbar) ── */
+.sidebar-scroll-area {
+  scrollbar-width: none !important;
+}
+.sidebar-scroll-area::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+}
+
+/* ── STREAM CHANNELLIST — must not force height inside sidebar ──────── */
+/* .str-chat__channel-list has height:100% by default which causes
+   the scroll container to overflow even with little content */
+.sidebar-scroll-area .str-chat__channel-list,
+.sidebar-scroll-area .str-chat,
+.sidebar-scroll-area .str-chat__channel-list-react {
+  height: auto !important;
+  min-height: 0 !important;
+  overflow: visible !important;
+  flex: none !important;
+}
+/* .app-shell-chat-root wraps Chat children as a flex row */
+.app-shell-chat-root {
+  display: flex !important;
+  flex-direction: row !important;
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+  height: 100% !important;
+  overflow: hidden !important;
+  position: relative !important;
+}
+/* Neutralize the .str-chat div that Chat renders inside app-shell-chat-root */
+.app-shell-chat-root > .str-chat {
+  display: contents !important;
+}
+
+/* ── STREAM INTERNAL CHAIN — always full width ──────────── */
+.app-chat .str-chat__channel,
+.app-chat .str-chat__container,
+.app-chat .str-chat__main-panel,
+.app-chat .str-chat__channel-inner,
+.chat-main .str-chat,
+.chat-main .str-chat__channel,
+.chat-main .str-chat__container,
+.chat-main .str-chat__main-panel,
+.chat-main .str-chat__channel-inner {
+  flex: 1 1 0 !important;
+  min-height: 0 !important;
+  min-width: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  background: transparent !important;
+  overflow: hidden !important;
+}
+
+.app-chat .str-chat__list,
+.app-chat .str-chat__message-list-scroll,
+.chat-main .str-chat__list,
+.chat-main .str-chat__message-list-scroll {
+  flex: 1 1 0 !important;
+  min-height: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  background: transparent !important;
+}
+
+.app-chat .str-chat__message-input,
+.chat-main .str-chat__message-input {
+  display: none !important;
+}
+
+/* ── BACKGROUNDS ────────────────────────────────────────── */
+.app-chat,
+.chat-main { background: #0f1117 !important; }
+
+.app-chat .str-chat__channel,
+.app-chat .str-chat__container,
+.app-chat .str-chat__main-panel,
+.app-chat .str-chat__channel-inner,
+.app-chat .str-chat__list,
+.app-chat .str-chat__message-list-scroll,
+.app-chat .str-chat__ul,
+.chat-main .str-chat,
+.chat-main .str-chat__channel,
+.chat-main .str-chat__container,
+.chat-main .str-chat__main-panel,
+.chat-main .str-chat__channel-inner,
+.chat-main .str-chat__list,
+.chat-main .str-chat__message-list-scroll,
+.chat-main .str-chat__ul { background: transparent !important; }

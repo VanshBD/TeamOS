@@ -1,0 +1,58 @@
+/* ═══════════════════════════════════════════════════════════
+   TEAMOS — VISIBILITY FIX PART 2
+   Input, modals, empty state, scrollbar, channel header
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── INPUT BAR ──────────────────────────────────────────── */
+.chat-input-wrapper {
+  background: #111827 !important;
+  border: 1px solid rgba(109,40,217,.25) !important;
+  margin: 0 10px 10px !important;
+  border-radius: 16px !important;
+}
+.chat-input-wrapper:focus-within {
+  border-color: rgba(109,40,217,.5) !important;
+  box-shadow: 0 0 0 3px rgba(109,40,217,.12), 0 4px 20px rgba(0,0,0,.4) !important;
+}
+.chat-input-textarea {
+  color: #F9FAFB !important;
+  background: transparent !important;
+  font-size: 14px !important;
+}
+.chat-input-textarea::placeholder { color: #6B7280 !important; }
+
+/* Reply preview bar text */
+.reply-preview-bar__name { color: #93c5fd !important; }
+.reply-preview-bar__text { color: #9CA3AF !important; }
+
+/* ── CHANNEL HEADER ─────────────────────────────────────── */
+.ch-header { background: #0d0d1a !important; border-bottom: 1px solid rgba(255,255,255,.07) !important; }
+.ch-header__name { color: #F9FAFB !important; }
+.ch-header__icon { color: #6B7280 !important; }
+.ch-header__btn { color: #9CA3AF !important; }
+.ch-header__btn:hover { color: #F9FAFB !important; }
+.ch-header__btn-label { color: #9CA3AF !important; }
+
+/* Dropdown */
+.ch-dropdown { background: #111827 !important; border-color: rgba(255,255,255,.1) !important; }
+.ch-dropdown__item { color: #D1D5DB !important; }
+.ch-dropdown__item:hover { color: #F9FAFB !important; background: rgba(109,40,217,.15) !important; }
+.ch-dropdown__item-title { color: #F9FAFB !important; }
+.ch-dropdown__item-sub { color: #6B7280 !important; }
+.ch-dropdown__item--danger { color: #fca5a5 !important; }
+.ch-dropdown__divider { background: rgba(255,255,255,.07) !important; }
+
+/* ── PINNED BANNER ──────────────────────────────────────── */
+.pinned-banner__label { color: #a78bfa !important; }
+.pinned-banner__text { color: #D1D5DB !important; }
+
+/* ── LIVE CALL BANNER ───────────────────────────────────── */
+.live-call-banner__text { color: #ffffff !important; }
+
+/* ── MOBILE TOPBAR ──────────────────────────────────────── */
+.mobile-topbar__title { color: #F9FAFB !important; }
+
+/* ── CALL CARDS ─────────────────────────────────────────── */
+.call-card__title { color: #F9FAFB !important; }
+.call-card__meta { color: #9CA3AF !important; }
+.call-card__hint { color: #6B7280 !important; }

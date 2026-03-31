@@ -1,0 +1,650 @@
+/* ═══════════════════════════════════════════════════════════
+   TEAMOS — POLISH LAYER
+   Deep visual upgrade: depth, texture, grouping, glow, life
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── 1. CHAT BACKGROUND — immersive, not flat white ─────── */
+.chat-main {
+  background:
+    radial-gradient(ellipse 80% 60% at 20% 10%, rgba(109,40,217,.04) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 80% at 80% 90%, rgba(37,99,235,.03) 0%, transparent 60%),
+    #0d0d1a !important;
+}
+
+/* Message list area */
+.chat-main .str-chat__list,
+.chat-main .str-chat__message-list-scroll {
+  background: transparent !important;
+  padding: 8px 0 16px !important;
+}
+
+/* ── 2. MESSAGE BUBBLES — depth + glow ──────────────────── */
+.msg-bubble--own {
+  background: linear-gradient(135deg, #1e40af 0%, #2563eb 50%, #3b82f6 100%) !important;
+  box-shadow:
+    0 4px 16px rgba(37,99,235,.28),
+    0 1px 4px rgba(37,99,235,.15),
+    inset 0 1px 0 rgba(255,255,255,.12) !important;
+  border: 1px solid rgba(59,130,246,.25) !important;
+}
+.msg-row:hover .msg-bubble--own {
+  box-shadow:
+    0 6px 24px rgba(37,99,235,.38),
+    0 2px 8px rgba(37,99,235,.2),
+    inset 0 1px 0 rgba(255,255,255,.15) !important;
+}
+
+.msg-bubble--other {
+  background: rgba(255,255,255,.055) !important;
+  backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(255,255,255,.09) !important;
+  box-shadow:
+    0 2px 12px rgba(0,0,0,.25),
+    inset 0 1px 0 rgba(255,255,255,.06) !important;
+}
+.msg-row:hover .msg-bubble--other {
+  background: rgba(255,255,255,.075) !important;
+  border-color: rgba(255,255,255,.13) !important;
+}
+
+/* ── 3. MESSAGE GROUPING — tighter, more natural ────────── */
+.msg-row { padding: 2px 16px !important; }
+.msg-row + .msg-row { margin-top: 0 !important; }
+
+/* Larger gap when sender changes (handled via first-of-type spacing) */
+.str-chat__li--top .msg-row,
+.str-chat__li--single .msg-row { padding-top: 8px !important; }
+
+/* ── 4. MESSAGE TEXT — better readability ───────────────── */
+.msg-text {
+  font-size: 14px !important;
+  line-height: 1.6 !important;
+  letter-spacing: .01em !important;
+}
+.msg-bubble--own .msg-text { color: rgba(255,255,255,.96) !important; }
+.msg-bubble--other .msg-text { color: rgba(241,240,255,.9) !important; }
+
+/* ── 5. TIMESTAMPS — clean, subtle ─────────────────────── */
+.msg-meta__time {
+  font-size: 10px !important;
+  color: rgba(160,158,192,.45) !important;
+  letter-spacing: .02em !important;
+}
+.msg-bubble__time {
+  font-size: 10px !important;
+  color: rgba(255,255,255,.4) !important;
+  letter-spacing: .02em !important;
+}
+
+/* ── 6. SENDER NAME — hierarchy ─────────────────────────── */
+.msg-meta__name {
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  color: rgba(196,181,253,.85) !important;
+  letter-spacing: .01em !important;
+}
+
+/* ── 7. AVATAR — premium ring ───────────────────────────── */
+.msg-avatar__img {
+  border: 1.5px solid rgba(109,40,217,.35) !important;
+  box-shadow: 0 0 8px rgba(109,40,217,.2) !important;
+}
+.msg-avatar__placeholder {
+  box-shadow: 0 0 10px rgba(109,40,217,.3) !important;
+}
+
+/* ── 8. HOVER ACTIONS — polished reveal ─────────────────── */
+.msg-action-btn {
+  background: rgba(15,15,26,.85) !important;
+  border: 1px solid rgba(109,40,217,.2) !important;
+  color: rgba(160,158,192,.8) !important;
+  backdrop-filter: blur(12px) !important;
+  font-size: 11px !important;
+  padding: 4px 10px !important;
+  border-radius: 999px !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,.3) !important;
+  transition: all .18s cubic-bezier(.4,0,.2,1) !important;
+}
+.msg-action-btn:hover {
+  background: rgba(109,40,217,.2) !important;
+  border-color: rgba(109,40,217,.45) !important;
+  color: #f1f0ff !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 14px rgba(109,40,217,.25) !important;
+}
+
+/* ── 9. REPLY COUNT BADGE ───────────────────────────────── */
+.msg-reply-count {
+  background: rgba(37,99,235,.12) !important;
+  border: 1px solid rgba(37,99,235,.2) !important;
+  color: rgba(147,197,253,.9) !important;
+  font-size: 11px !important;
+  padding: 3px 10px !important;
+  border-radius: 999px !important;
+  backdrop-filter: blur(8px) !important;
+  transition: all .15s !important;
+}
+.msg-reply-count:hover {
+  background: rgba(37,99,235,.22) !important;
+  border-color: rgba(37,99,235,.35) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* ── 10. QUOTED REPLY — glass style ─────────────────────── */
+.quoted-reply {
+  background: rgba(255,255,255,.05) !important;
+  border-radius: 10px !important;
+  border: none !important;
+  border-left: none !important;
+  overflow: hidden !important;
+  margin-bottom: 8px !important;
+  transition: background .15s !important;
+}
+.quoted-reply:hover { background: rgba(255,255,255,.08) !important; }
+.quoted-reply__bar {
+  width: 3px !important;
+  background: linear-gradient(180deg, #6d28d9, #2563eb) !important;
+  flex-shrink: 0 !important;
+}
+.msg-bubble--own .quoted-reply { background: rgba(255,255,255,.12) !important; }
+.msg-bubble--own .quoted-reply:hover { background: rgba(255,255,255,.18) !important; }
+.msg-bubble--own .quoted-reply__bar { background: rgba(255,255,255,.5) !important; }
+.quoted-reply__name { color: rgba(196,181,253,.9) !important; font-weight: 700 !important; }
+.msg-bubble--own .quoted-reply__name { color: rgba(255,255,255,.8) !important; }
+.quoted-reply__text { color: rgba(160,158,192,.7) !important; }
+.msg-bubble--own .quoted-reply__text { color: rgba(255,255,255,.55) !important; }
+
+/* ── 11. MESSAGE HIGHLIGHT ──────────────────────────────── */
+@keyframes msgHighlightPulse {
+  0%   { background: rgba(109,40,217,.22); box-shadow: 0 0 0 2px rgba(109,40,217,.3); }
+  60%  { background: rgba(109,40,217,.1); }
+  100% { background: transparent; box-shadow: none; }
+}
+.msg-highlight {
+  animation: msgHighlightPulse 1.6s ease-out forwards !important;
+  border-radius: 14px !important;
+}
+
+/* ── 12. DATE SEPARATOR ─────────────────────────────────── */
+.str-chat__date-separator {
+  padding: 12px 16px !important;
+  display: flex !important; align-items: center !important; gap: 12px !important;
+}
+.str-chat__date-separator-line {
+  flex: 1 !important; height: 1px !important;
+  background: linear-gradient(90deg, transparent, rgba(109,40,217,.2), transparent) !important;
+}
+.str-chat__date-separator-date {
+  font-size: 10px !important; font-weight: 700 !important;
+  text-transform: uppercase !important; letter-spacing: .1em !important;
+  color: rgba(160,158,192,.45) !important;
+  background: rgba(109,40,217,.08) !important;
+  border: 1px solid rgba(109,40,217,.15) !important;
+  border-radius: 999px !important; padding: 3px 12px !important;
+  backdrop-filter: blur(8px) !important;
+}
+
+/* ── 13. FLOATING INPUT BAR ─────────────────────────────── */
+.chat-input-wrapper {
+  margin: 0 12px 12px !important;
+  border-radius: 18px !important;
+  border: 1px solid rgba(109,40,217,.2) !important;
+  background: rgba(15,15,26,.92) !important;
+  backdrop-filter: blur(24px) !important;
+  box-shadow:
+    0 -2px 20px rgba(0,0,0,.3),
+    0 0 30px rgba(109,40,217,.06),
+    inset 0 1px 0 rgba(255,255,255,.05) !important;
+  transition: border-color .2s, box-shadow .2s !important;
+}
+.chat-input-wrapper:focus-within {
+  border-color: rgba(109,40,217,.4) !important;
+  box-shadow:
+    0 -2px 24px rgba(0,0,0,.35),
+    0 0 40px rgba(109,40,217,.1),
+    inset 0 1px 0 rgba(255,255,255,.07) !important;
+}
+
+.chat-input-row { padding: 10px 12px !important; }
+
+.chat-input-textarea {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  padding: 6px 10px !important;
+  font-size: 14px !important;
+  color: rgba(241,240,255,.92) !important;
+  box-shadow: none !important;
+}
+.chat-input-textarea:focus {
+  border: none !important;
+  box-shadow: none !important;
+}
+.chat-input-textarea::placeholder { color: rgba(160,158,192,.35) !important; }
+
+/* Send button — animated activation */
+.chat-input-send {
+  width: 38px !important; height: 38px !important;
+  border-radius: 12px !important;
+  background: rgba(255,255,255,.05) !important;
+  border: 1px solid rgba(255,255,255,.08) !important;
+  transition: all .2s cubic-bezier(.34,1.56,.64,1) !important;
+}
+.chat-input-send--active {
+  background: linear-gradient(135deg, #1e40af, #2563eb) !important;
+  border-color: rgba(37,99,235,.4) !important;
+  box-shadow: 0 4px 16px rgba(37,99,235,.4), 0 0 20px rgba(37,99,235,.2) !important;
+  transform: scale(1.05) !important;
+}
+.chat-input-send--active:hover {
+  transform: scale(1.1) translateY(-1px) !important;
+  box-shadow: 0 6px 22px rgba(37,99,235,.5), 0 0 28px rgba(37,99,235,.25) !important;
+}
+
+/* Plus button */
+.chat-input-plus-btn {
+  width: 38px !important; height: 38px !important;
+  border-radius: 12px !important;
+  background: linear-gradient(135deg, rgba(109,40,217,.7), rgba(147,51,234,.7)) !important;
+  border: 1px solid rgba(109,40,217,.4) !important;
+  box-shadow: 0 2px 10px rgba(109,40,217,.25) !important;
+  transition: all .2s cubic-bezier(.34,1.56,.64,1) !important;
+}
+.chat-input-plus-btn:hover {
+  background: linear-gradient(135deg, #6d28d9, #9333ea) !important;
+  box-shadow: 0 4px 18px rgba(109,40,217,.45), 0 0 20px rgba(109,40,217,.2) !important;
+  transform: scale(1.08) !important;
+}
+.chat-input-plus-btn--active {
+  transform: rotate(45deg) scale(1.08) !important;
+  box-shadow: 0 4px 18px rgba(109,40,217,.5) !important;
+}
+
+/* Emoji button */
+.chat-input-action-btn {
+  width: 34px !important; height: 34px !important;
+  border-radius: 10px !important;
+  transition: all .18s cubic-bezier(.34,1.56,.64,1) !important;
+}
+.chat-input-action-btn:hover {
+  transform: scale(1.1) !important;
+  background: rgba(109,40,217,.15) !important;
+  color: #c4b5fd !important;
+}
+
+/* Reply preview bar */
+.reply-preview-bar {
+  border-radius: 14px 14px 0 0 !important;
+  background: rgba(37,99,235,.08) !important;
+  border-bottom: 1px solid rgba(37,99,235,.12) !important;
+  padding: 8px 14px !important;
+}
+
+/* ── 14. SIDEBAR — premium glass ────────────────────────── */
+.sidebar {
+  background:
+    linear-gradient(180deg, rgba(109,40,217,.06) 0%, transparent 40%),
+    rgba(8,8,16,.92) !important;
+  border-right: 1px solid rgba(109,40,217,.12) !important;
+}
+
+/* Sidebar glow edge */
+.sidebar::after {
+  background: linear-gradient(180deg,
+    transparent 0%,
+    rgba(109,40,217,.35) 25%,
+    rgba(37,99,235,.25) 60%,
+    rgba(109,40,217,.2) 80%,
+    transparent 100%) !important;
+}
+
+/* Channel items */
+.channel-preview-item {
+  border-radius: 10px !important;
+  transition: all .2s cubic-bezier(.4,0,.2,1) !important;
+}
+.channel-preview-item:hover {
+  background: rgba(109,40,217,.12) !important;
+  transform: translateX(4px) !important;
+  box-shadow: inset 0 0 0 1px rgba(109,40,217,.15) !important;
+}
+.channel-preview-item--active {
+  background: rgba(109,40,217,.18) !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(109,40,217,.3),
+    0 2px 12px rgba(109,40,217,.15) !important;
+  transform: translateX(5px) !important;
+}
+
+/* DM items */
+.dm-item {
+  border-radius: 10px !important;
+  transition: all .2s cubic-bezier(.4,0,.2,1) !important;
+}
+.dm-item:hover {
+  background: rgba(109,40,217,.1) !important;
+  transform: translateX(4px) !important;
+}
+.dm-item--active {
+  background: rgba(109,40,217,.18) !important;
+  box-shadow: inset 0 0 0 1px rgba(109,40,217,.3) !important;
+  transform: translateX(5px) !important;
+}
+
+/* Online dot pulse */
+.dm-item__dot--online {
+  animation: onlinePulse 2.5s ease-in-out infinite !important;
+}
+@keyframes onlinePulse {
+  0%,100% { box-shadow: 0 0 0 0 rgba(34,197,94,.5); }
+  50%      { box-shadow: 0 0 0 4px rgba(34,197,94,.0); }
+}
+
+/* Create channel button */
+.create-channel-btn {
+  border-radius: 12px !important;
+  font-size: 12px !important;
+  padding: 10px 14px !important;
+  letter-spacing: .04em !important;
+  box-shadow: 0 4px 16px rgba(109,40,217,.3), inset 0 1px 0 rgba(255,255,255,.1) !important;
+}
+.create-channel-btn:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 24px rgba(109,40,217,.45), 0 0 20px rgba(109,40,217,.2), inset 0 1px 0 rgba(255,255,255,.12) !important;
+}
+
+/* Section headers */
+.sidebar__section-header {
+  font-size: 9px !important;
+  letter-spacing: .14em !important;
+  color: rgba(160,158,192,.35) !important;
+  padding: 14px 14px 5px !important;
+}
+
+/* ── 15. CHANNEL HEADER ─────────────────────────────────── */
+.ch-header {
+  background: rgba(8,8,16,.88) !important;
+  backdrop-filter: blur(24px) !important;
+  border-bottom: 1px solid rgba(255,255,255,.05) !important;
+  box-shadow: 0 1px 0 rgba(109,40,217,.08) !important;
+}
+.ch-header__name {
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  color: rgba(241,240,255,.95) !important;
+  letter-spacing: -.01em !important;
+}
+.ch-header__btn {
+  border-radius: 9px !important;
+  transition: all .18s cubic-bezier(.4,0,.2,1) !important;
+}
+.ch-header__btn:hover {
+  background: rgba(109,40,217,.14) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 2px 10px rgba(109,40,217,.15) !important;
+}
+.ch-header__btn--call:hover {
+  background: rgba(37,99,235,.14) !important;
+  box-shadow: 0 2px 12px rgba(37,99,235,.2) !important;
+}
+
+/* ── 16. PINNED BANNER ──────────────────────────────────── */
+.pinned-banner {
+  background: rgba(109,40,217,.07) !important;
+  border-bottom: 1px solid rgba(109,40,217,.15) !important;
+  backdrop-filter: blur(12px) !important;
+}
+.pinned-banner__bar {
+  background: linear-gradient(180deg, #9333ea, #2563eb) !important;
+}
+
+/* ── 17. LIVE CALL BANNER ───────────────────────────────── */
+.live-call-banner {
+  background: linear-gradient(90deg,
+    rgba(37,99,235,.85) 0%,
+    rgba(109,40,217,.85) 50%,
+    rgba(37,99,235,.85) 100%) !important;
+  backdrop-filter: blur(12px) !important;
+  border-bottom: 1px solid rgba(37,99,235,.25) !important;
+}
+
+/* ── 18. POLL CARD ──────────────────────────────────────── */
+.poll-card {
+  background: rgba(255,255,255,.04) !important;
+  border: 1px solid rgba(255,255,255,.08) !important;
+  backdrop-filter: blur(12px) !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,.2) !important;
+}
+.poll-option {
+  background: rgba(255,255,255,.04) !important;
+  border-color: rgba(255,255,255,.08) !important;
+  transition: all .18s !important;
+}
+.poll-option:hover { background: rgba(109,40,217,.1) !important; border-color: rgba(109,40,217,.25) !important; }
+.poll-option--voted { background: rgba(109,40,217,.15) !important; border-color: rgba(109,40,217,.4) !important; }
+.poll-option__bar { background: rgba(109,40,217,.18) !important; }
+
+/* ── 19. LOCATION CARD ──────────────────────────────────── */
+.loc-card {
+  background: rgba(255,255,255,.04) !important;
+  border: 1px solid rgba(255,255,255,.08) !important;
+  backdrop-filter: blur(12px) !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,.25) !important;
+}
+.loc-card:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 28px rgba(0,0,0,.35) !important;
+  border-color: rgba(255,255,255,.12) !important;
+}
+.loc-card__info { background: rgba(15,15,26,.7) !important; backdrop-filter: blur(8px) !important; }
+.loc-card__title { color: rgba(241,240,255,.9) !important; }
+.loc-card__coords { color: rgba(160,158,192,.55) !important; }
+
+/* ── 20. FILE ATTACHMENT ────────────────────────────────── */
+.msg-attachment-file {
+  background: rgba(37,99,235,.08) !important;
+  border: 1px solid rgba(37,99,235,.15) !important;
+  backdrop-filter: blur(8px) !important;
+  transition: all .18s !important;
+}
+.msg-attachment-file:hover {
+  background: rgba(37,99,235,.14) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 14px rgba(37,99,235,.15) !important;
+}
+.msg-attachment-file__name { color: rgba(147,197,253,.9) !important; }
+
+/* ── 21. EMOJI DROPDOWN ─────────────────────────────────── */
+.emoji-dropdown {
+  background: rgba(15,15,26,.97) !important;
+  border: 1px solid rgba(109,40,217,.2) !important;
+  box-shadow: 0 20px 50px rgba(0,0,0,.6), 0 0 30px rgba(109,40,217,.1) !important;
+}
+.emoji-dropdown__search {
+  background: rgba(255,255,255,.06) !important;
+  border-color: rgba(255,255,255,.1) !important;
+  color: #f1f0ff !important;
+}
+.emoji-dropdown__btn:hover { background: rgba(109,40,217,.15) !important; }
+
+/* ── 22. ATTACHMENT PREVIEW STRIP ──────────────────────── */
+.attachment-preview-strip {
+  padding: 8px 12px 0 !important;
+  border-top: 1px solid rgba(255,255,255,.05) !important;
+}
+.attachment-preview-item {
+  background: rgba(255,255,255,.06) !important;
+  border: 1px solid rgba(255,255,255,.1) !important;
+  border-radius: 10px !important;
+}
+
+/* ── 23. STREAM THREAD PANEL ────────────────────────────── */
+.str-chat__thread {
+  background: rgba(10,10,20,.95) !important;
+  border-left: 1px solid rgba(109,40,217,.12) !important;
+  backdrop-filter: blur(20px) !important;
+}
+
+/* ── 24. SCROLLBAR — premium thin ───────────────────────── */
+* {
+  scrollbar-width: thin !important;
+  scrollbar-color: rgba(109,40,217,.2) transparent !important;
+}
+*::-webkit-scrollbar { width: 4px !important; height: 4px !important; }
+*::-webkit-scrollbar-track { background: transparent !important; }
+*::-webkit-scrollbar-thumb { background: rgba(109,40,217,.2) !important; border-radius: 4px !important; }
+*::-webkit-scrollbar-thumb:hover { background: rgba(109,40,217,.4) !important; }
+
+/* ── 25. UNREAD BADGES — glow ───────────────────────────── */
+.channel-preview-item__badge,
+.dm-item__badge {
+  box-shadow: 0 0 8px rgba(239,68,68,.5), 0 0 16px rgba(239,68,68,.2) !important;
+  animation: badgePulse 2s ease-in-out infinite !important;
+}
+@keyframes badgePulse {
+  0%,100% { box-shadow: 0 0 6px rgba(239,68,68,.4); }
+  50%      { box-shadow: 0 0 12px rgba(239,68,68,.6), 0 0 20px rgba(239,68,68,.2); }
+}
+
+/* ── 26. MOBILE TOPBAR ──────────────────────────────────── */
+.mobile-topbar {
+  background: rgba(8,8,16,.92) !important;
+  backdrop-filter: blur(20px) !important;
+  border-bottom: 1px solid rgba(109,40,217,.1) !important;
+}
+.mobile-topbar__menu {
+  background: rgba(109,40,217,.1) !important;
+  border: 1px solid rgba(109,40,217,.2) !important;
+  color: #c4b5fd !important;
+}
+
+/* ── 27. CALL CARDS ─────────────────────────────────────── */
+.call-card--active {
+  background: rgba(37,99,235,.08) !important;
+  border: 1px solid rgba(37,99,235,.2) !important;
+  backdrop-filter: blur(12px) !important;
+  box-shadow: 0 4px 20px rgba(37,99,235,.1) !important;
+}
+.call-card--ended {
+  background: rgba(255,255,255,.03) !important;
+  border: 1px solid rgba(255,255,255,.07) !important;
+}
+.call-card__title { color: rgba(241,240,255,.9) !important; }
+.call-card__meta { color: rgba(160,158,192,.55) !important; }
+
+/* ── 28. SMOOTH TRANSITIONS EVERYWHERE ─────────────────── */
+button, a, input, textarea {
+  transition: all .18s cubic-bezier(.4,0,.2,1) !important;
+}
+
+/* ── 29. FOCUS RINGS — branded ──────────────────────────── */
+button:focus-visible {
+  outline: 2px solid rgba(109,40,217,.6) !important;
+  outline-offset: 2px !important;
+}
+input:focus-visible, textarea:focus-visible {
+  outline: none !important;
+}
+
+/* ── 30. SELECTION COLOR ────────────────────────────────── */
+::selection {
+  background: rgba(109,40,217,.35) !important;
+  color: #f1f0ff !important;
+}
+
+/* ── 31. MESSAGE GROUPING via Stream li classes ─────────── */
+/* Stream adds str-chat__li--top/middle/bottom/single */
+.str-chat__li--middle .msg-row,
+.str-chat__li--bottom .msg-row {
+  padding-top: 1px !important;
+}
+.str-chat__li--middle .msg-meta,
+.str-chat__li--bottom .msg-meta {
+  display: none !important; /* hide name/time for grouped messages */
+}
+.str-chat__li--middle .msg-avatar,
+.str-chat__li--bottom .msg-avatar {
+  visibility: hidden !important; /* keep space but hide avatar for grouped */
+}
+.str-chat__li--bottom .msg-avatar {
+  visibility: visible !important; /* show avatar on last in group */
+}
+.str-chat__li--top .msg-row,
+.str-chat__li--single .msg-row {
+  padding-top: 10px !important;
+}
+
+/* ── 32. ATTACHMENT MODAL — dark polish ─────────────────── */
+.att-modal {
+  background: rgba(12,12,22,.97) !important;
+  border: 1px solid rgba(109,40,217,.2) !important;
+  box-shadow: 0 30px 60px rgba(0,0,0,.7), 0 0 60px rgba(109,40,217,.12) !important;
+}
+.att-modal__profile { border-color: rgba(255,255,255,.06) !important; }
+.att-modal__profile-name { color: #f1f0ff !important; }
+.att-modal__profile-sub { color: rgba(160,158,192,.5) !important; }
+.att-menu-item {
+  background: rgba(255,255,255,.04) !important;
+  border-radius: 14px !important;
+  transition: all .2s cubic-bezier(.34,1.56,.64,1) !important;
+}
+.att-menu-item:hover {
+  background: rgba(109,40,217,.1) !important;
+  transform: scale(1.04) translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(0,0,0,.3) !important;
+}
+.att-menu-item__label { color: rgba(241,240,255,.8) !important; }
+.att-panel { background: transparent !important; }
+.att-panel__header { border-color: rgba(255,255,255,.06) !important; color: #f1f0ff !important; }
+.att-panel__label { color: rgba(160,158,192,.5) !important; }
+.att-panel__input {
+  background: rgba(255,255,255,.05) !important;
+  border-color: rgba(255,255,255,.1) !important;
+  color: #f1f0ff !important;
+}
+.att-panel__input:focus { border-color: rgba(109,40,217,.5) !important; }
+.att-panel__send-btn {
+  background: linear-gradient(135deg, #6d28d9, #9333ea) !important;
+  box-shadow: 0 4px 16px rgba(109,40,217,.4) !important;
+  border-radius: 14px !important;
+}
+.att-panel__send-btn:hover:not(:disabled) {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 6px 22px rgba(109,40,217,.55) !important;
+}
+.att-panel__duration-btn {
+  background: rgba(255,255,255,.04) !important;
+  border-color: rgba(255,255,255,.1) !important;
+  color: rgba(160,158,192,.8) !important;
+}
+.att-panel__duration-btn--active {
+  background: rgba(109,40,217,.15) !important;
+  border-color: rgba(109,40,217,.4) !important;
+  color: #c4b5fd !important;
+}
+.att-panel__add-opt { background: rgba(255,255,255,.05) !important; color: rgba(160,158,192,.7) !important; }
+.att-panel__remove-opt { background: rgba(239,68,68,.1) !important; color: #fca5a5 !important; }
+.att-panel__checkbox-label { color: rgba(241,240,255,.8) !important; }
+.att-panel__footer { border-color: rgba(255,255,255,.06) !important; }
+.att-panel__back { background: rgba(255,255,255,.06) !important; color: rgba(160,158,192,.7) !important; }
+.loc-tabs { border-color: rgba(255,255,255,.06) !important; }
+.loc-tab { color: rgba(160,158,192,.5) !important; }
+.loc-tab--active { color: #c4b5fd !important; border-bottom-color: #9333ea !important; }
+.loc-current-preview__title { color: #f1f0ff !important; }
+.loc-current-preview__sub { color: rgba(160,158,192,.5) !important; }
+.loc-live-hint { background: rgba(37,99,235,.08) !important; border-color: rgba(37,99,235,.15) !important; color: rgba(147,197,253,.7) !important; }
+
+/* ── 33. PUBLIC CHANNEL SEARCH ──────────────────────────── */
+.pub-search__input {
+  background: rgba(255,255,255,.05) !important;
+  border-color: rgba(255,255,255,.1) !important;
+  color: #f1f0ff !important;
+}
+.pub-search__result {
+  background: rgba(255,255,255,.04) !important;
+  border-color: rgba(255,255,255,.07) !important;
+}
+.pub-search__result:hover {
+  background: rgba(109,40,217,.1) !important;
+  border-color: rgba(109,40,217,.25) !important;
+}

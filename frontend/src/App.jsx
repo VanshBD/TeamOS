@@ -5,6 +5,7 @@ import AuthPage from "./pages/AuthPage";
 import CallPage from "./pages/CallPage";
 import HomePage from "./pages/HomePage";
 import PublicChannelPage from "./pages/PublicChannelPage";
+import ProfilePage from "./pages/ProfilePage";
 
 import * as Sentry from "@sentry/react";
 
@@ -19,6 +20,11 @@ const App = () => {
     <SentryRoutes>
       <Route path="/" element={isSignedIn ? <HomePage /> : <Navigate to={"/auth"} replace />} />
       <Route path="/auth" element={!isSignedIn ? <AuthPage /> : <Navigate to={"/"} replace />} />
+
+      <Route
+        path="/profile"
+        element={isSignedIn ? <ProfilePage /> : <Navigate to={"/auth"} replace />}
+      />
 
       <Route
         path="/call/:id"

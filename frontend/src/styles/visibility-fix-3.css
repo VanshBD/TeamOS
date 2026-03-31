@@ -1,0 +1,115 @@
+/* ═══════════════════════════════════════════════════════════
+   TEAMOS — VISIBILITY FIX PART 3
+   Modals, empty state, scrollbar, public channel search
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── MODALS — high contrast ─────────────────────────────── */
+.fixed.inset-0.z-50 > div {
+  background: #0f172a !important;
+  border: 1px solid rgba(255,255,255,.1) !important;
+}
+.fixed.inset-0.z-50 h2 { color: #F9FAFB !important; }
+.fixed.inset-0.z-50 .text-gray-500,
+.fixed.inset-0.z-50 .text-gray-400 { color: #9CA3AF !important; }
+.fixed.inset-0.z-50 .text-gray-700,
+.fixed.inset-0.z-50 .text-gray-900 { color: #F9FAFB !important; }
+.fixed.inset-0.z-50 .border-b { border-color: rgba(255,255,255,.07) !important; }
+.fixed.inset-0.z-50 .text-base { color: #D1D5DB !important; }
+.fixed.inset-0.z-50 .text-sm { color: #D1D5DB !important; }
+.fixed.inset-0.z-50 .text-sm.font-medium { color: #F9FAFB !important; }
+
+/* Create channel modal */
+.create-channel-modal { background: #0f172a !important; }
+.create-channel-modal__header h2 { color: #F9FAFB !important; }
+.form-group label { color: #D1D5DB !important; }
+.form-input, .form-textarea {
+  background: #1f2937 !important;
+  border-color: rgba(255,255,255,.12) !important;
+  color: #F9FAFB !important;
+}
+.form-input::placeholder, .form-textarea::placeholder { color: #6B7280 !important; }
+.form-input:focus, .form-textarea:focus {
+  border-color: rgba(109,40,217,.5) !important;
+  box-shadow: 0 0 0 3px rgba(109,40,217,.15) !important;
+}
+.form-hint { color: #9CA3AF !important; }
+.radio-title { color: #F9FAFB !important; }
+.radio-description { color: #9CA3AF !important; }
+
+/* ── PUBLIC CHANNEL SEARCH ──────────────────────────────── */
+.pub-search__label { color: #6B7280 !important; }
+.pub-search__input {
+  background: #1f2937 !important;
+  border-color: rgba(255,255,255,.12) !important;
+  color: #F9FAFB !important;
+}
+.pub-search__input::placeholder { color: #6B7280 !important; }
+.pub-search__input:focus { border-color: rgba(109,40,217,.5) !important; }
+.pub-search__error { color: #fca5a5 !important; }
+.pub-search__result-name { color: #F9FAFB !important; }
+.pub-search__result-meta { color: #9CA3AF !important; }
+.pub-search__result { background: #1a1f2e !important; border-color: rgba(255,255,255,.08) !important; }
+.pub-search__result:hover { background: rgba(109,40,217,.12) !important; }
+
+/* ── POLL CARD ──────────────────────────────────────────── */
+.poll-card { background: #1a1f2e !important; border-color: rgba(255,255,255,.08) !important; }
+.poll-card__question { color: #F9FAFB !important; }
+.poll-card__label { color: #a78bfa !important; }
+.poll-card__total { color: #9CA3AF !important; }
+.poll-option__text { color: #D1D5DB !important; }
+.poll-option__pct { color: #a78bfa !important; }
+.poll-option__check { color: #a78bfa !important; }
+.poll-card__voters-toggle { color: #a78bfa !important; }
+.poll-voters-group__option { color: #9CA3AF !important; }
+.poll-voters-group__name { color: #c4b5fd !important; background: rgba(109,40,217,.2) !important; }
+
+/* ── LOCATION CARD ──────────────────────────────────────── */
+.loc-card { background: #1a1f2e !important; border-color: rgba(255,255,255,.08) !important; }
+.loc-card__title { color: #F9FAFB !important; }
+.loc-card__coords { color: #9CA3AF !important; }
+.loc-card__info { background: #111827 !important; }
+
+/* ── ATTACHMENT MODAL ───────────────────────────────────── */
+.att-modal { background: #0f172a !important; }
+.att-modal__profile-name { color: #F9FAFB !important; }
+.att-modal__profile-sub { color: #9CA3AF !important; }
+.att-menu-item__label { color: #D1D5DB !important; }
+.att-panel__header { color: #F9FAFB !important; border-color: rgba(255,255,255,.07) !important; }
+.att-panel__label { color: #9CA3AF !important; }
+.att-panel__input {
+  background: #1f2937 !important;
+  border-color: rgba(255,255,255,.12) !important;
+  color: #F9FAFB !important;
+}
+.att-panel__input::placeholder { color: #6B7280 !important; }
+.att-panel__checkbox-label { color: #D1D5DB !important; }
+.att-panel__footer { border-color: rgba(255,255,255,.07) !important; }
+.loc-tab { color: #9CA3AF !important; }
+.loc-tab--active { color: #c4b5fd !important; }
+.loc-current-preview__title { color: #F9FAFB !important; }
+.loc-current-preview__sub { color: #9CA3AF !important; }
+.loc-live-hint { color: #93c5fd !important; }
+.att-panel__duration-btn { color: #D1D5DB !important; }
+.att-panel__duration-btn--active { color: #c4b5fd !important; }
+
+/* ── EMOJI DROPDOWN ─────────────────────────────────────── */
+.emoji-dropdown { background: #111827 !important; border-color: rgba(255,255,255,.1) !important; }
+.emoji-dropdown__search {
+  background: #1f2937 !important;
+  border-color: rgba(255,255,255,.12) !important;
+  color: #F9FAFB !important;
+}
+.emoji-dropdown__search::placeholder { color: #6B7280 !important; }
+.emoji-dropdown__empty { color: #9CA3AF !important; }
+
+/* ── SCROLLBAR — visible but slim ───────────────────────── */
+* { scrollbar-width: thin !important; scrollbar-color: rgba(109,40,217,.35) rgba(255,255,255,.03) !important; }
+*::-webkit-scrollbar { width: 5px !important; height: 5px !important; }
+*::-webkit-scrollbar-track { background: rgba(255,255,255,.03) !important; border-radius: 5px !important; }
+*::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(109,40,217,.5), rgba(37,99,235,.4)) !important;
+  border-radius: 5px !important;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, rgba(109,40,217,.8), rgba(37,99,235,.7)) !important;
+}

@@ -31,3 +31,56 @@ export async function unpinMessageApi(messageId) {
   const response = await axiosInstance.post(`/chat/messages/${encodeURIComponent(messageId)}/unpin`);
   return response.data;
 }
+
+export async function votePollApi(messageId, optionId, userName, multiSelect) {
+  const response = await axiosInstance.post(`/chat/messages/${encodeURIComponent(messageId)}/vote`, {
+    optionId, userName, multiSelect,
+  });
+  return response.data;
+}
+
+// ── Friend system ──────────────────────────────────────────────
+export async function getFriends() {
+  const res = await axiosInstance.get("/friends");
+  return res.data;
+}
+
+export async function getIncomingRequests() {
+  const res = await axiosInstance.get("/friends/requests");
+  return res.data;
+}
+
+export async function getSentRequests() {
+  const res = await axiosInstance.get("/friends/sent");
+  return res.data;
+}
+
+export async function searchUsers(query) {
+  const res = await axiosInstance.get("/friends/search", { params: { q: query } });
+  return res.data;
+}
+
+export async function sendFriendRequest(targetUserId) {
+  const res = await axiosInstance.post(`/friends/request/${targetUserId}`);
+  return res.data;
+}
+
+export async function acceptFriendRequest(requestId) {
+  const res = await axiosInstance.post(`/friends/accept/${requestId}`);
+  return res.data;
+}
+
+export async function rejectFriendRequest(requestId) {
+  const res = await axiosInstance.post(`/friends/reject/${requestId}`);
+  return res.data;
+}
+
+export async function removeFriend(friendId) {
+  const res = await axiosInstance.delete(`/friends/${friendId}`);
+  return res.data;
+}
+
+export async function getCallHistory(channelId) {
+  const res = await axiosInstance.get(`/chat/channels/${encodeURIComponent(channelId)}/call-history`);
+  return res.data;
+}

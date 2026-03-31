@@ -236,10 +236,19 @@ const ChatInputWrapper = ({ replyingTo, onCancelReply, onReplySent }) => {
             }],
           });
         } else if (att.type === "poll") {
+          // Store poll in attachments so Stream preserves it on server round-trips
+          const pollData = {
+            ...att.poll,
+            votes: {},  // start empty
+          };
           await channel.sendMessage({
             text: `📊 Poll: ${att.poll.question}`,
             quoted_message_id: replyingTo?.id,
-            poll: att.poll,
+            attachments: [{
+              type: "poll",
+              poll: pollData,
+              title: att.poll.question,
+            }],
           });
         }
       }

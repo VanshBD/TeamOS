@@ -1,25 +1,28 @@
-import { HashIcon, LockIcon, UsersIcon, PinIcon, VideoIcon, MoreVerticalIcon, ShareIcon, TrashIcon, SettingsIcon } from "lucide-react";
+import { HashIcon, LockIcon, UsersIcon, PinIcon, VideoIcon, ShareIcon, TrashIcon, SettingsIcon } from "lucide-react";
 import { useChannelStateContext } from "stream-chat-react";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useContext } from "react";
 import { useUser } from "@clerk/clerk-react";
 import MembersModal from "./MembersModal";
 import PinnedMessagesModal from "./PinnedMessagesModal";
 import InviteModal from "./InviteModal";
 import ChannelSettingsModal from "./ChannelSettingsModal";
+import { PanelContext } from "../pages/HomePage";
+import CallHistoryPanel from "./CallHistoryPanel";
 import { buildCallMessageText } from "../lib/callMessages";
 import toast from "react-hot-toast";
 
 const CustomChannelHeader = () => {
   const { channel } = useChannelStateContext();
   const { user } = useUser();
+  const { openFriendProfile, openChannelDetail } = useContext(PanelContext);
 
   const memberCount = Object.keys(channel.state.members).length;
 
   const [showInvite, setShowInvite] = useState(false);
   const [showMembers, setShowMembers] = useState(false);
   const [showPinnedMessages, setShowPinnedMessages] = useState(false);
-  const [showDropdown, setShowDropdown] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showCallHistory, setShowCallHistory] = useState(false);
   const [pinnedMessages, setPinnedMessages] = useState([]);
   const dropdownRef = useRef(null);
 
@@ -107,144 +110,80 @@ const CustomChannelHeader = () => {
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setShowDropdown(false);
+        // no-op — dropdown removed
       }
     };
-
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   return (
     <>
-      <div className="h-14 border-b border-gray-200 flex items-center px-4 justify-between bg-white">
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2">
-            {channel.data?.private ? (
-              <LockIcon className="size-4 text-[#616061]" />
-            ) : (
-              <HashIcon className="size-4 text-[#616061]" />
-            )}
+      <div className="ch-header">
+        {/* Hamburger — mobile only, integrated into header */}
+        <button
+          className="ch-header__hamburger"
+          onClick={() => {
+            // dispatch a custom event that HomePage listens to
+            window.dispatchEvent(new CustomEvent("teamos:open-sidebar"));
+          }}
+          aria-label="Open sidebar"
+        >
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <rect y="2" width="18" height="2" rx="1" fill="currentColor"/>
+            <rect y="8" width="18" height="2" rx="1" fill="currentColor"/>
+            <rect y="14" width="18" height="2" rx="1" fill="currentColor"/>
+          </svg>
+        </button>
 
-            {isDM && otherUser?.user?.image && (
-              <img
-                src={otherUser.user.image}
-                alt={otherUser.user.name || otherUser.user.id}
-                className="size-7 rounded-full object-cover mr-1"
-              />
-            )}
+        {/* Left: channel info — click to open detail */}
+        <button
+          className="ch-header__left"
+          onClick={() => isDM
+            ? openFriendProfile({ id: otherUser?.user?.id, name: otherUser?.user?.name || otherUser?.user?.id, image: otherUser?.user?.image })
+            : openChannelDetail()
+          }
+          title={isDM ? "View profile" : "Channel details"}
+          style={{ background: "none", border: "none", cursor: "pointer", padding: 0, textAlign: "left" }}
+        >
+          {channel.data?.private
+            ? <LockIcon className="ch-header__icon" />
+            : <HashIcon className="ch-header__icon" />
+          }
+          {isDM && otherUser?.user?.image && (
+            <img src={otherUser.user.image} alt="" className="ch-header__dm-avatar" />
+          )}
+          <span className="ch-header__name">
+            {isDM ? otherUser?.user?.name || otherUser?.user?.id : channel.data?.name || channel.data?.id}
+          </span>
+        </button>
 
-            <span className="font-medium text-[#1D1C1D]">
-              {isDM ? otherUser?.user?.name || otherUser?.user?.id : channel.data?.id}
-            </span>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <button
-            className="flex items-center gap-2 hover:bg-[#F8F8F8] py-1 px-2 rounded"
-            onClick={() => setShowMembers(true)}
-          >
-            <UsersIcon className="size-5 text-[#616061]" />
-            <span className="text-sm text-[#616061]">{memberCount}</span>
+        {/* Right: actions */}
+        <div className="ch-header__actions">
+          <button className="ch-header__btn ch-header__btn--call" onClick={handleVideoCall} title="Start Video Call">
+            <VideoIcon className="size-4" />
           </button>
 
-          <button
-            className="hover:bg-[#F8F8F8] p-1 rounded"
-            onClick={handleVideoCall}
-            title="Start Video Call"
-          >
-            <VideoIcon className="size-5 text-[#1264A3]" />
+          <button className="ch-header__btn" onClick={() => setShowCallHistory(true)} title="Call History" style={{ fontSize: 16 }}>
+            🕐
           </button>
 
           {channel.data?.private && (
-            <button className="btn btn-primary" onClick={() => setShowInvite(true)}>
+            <button className="ch-header__btn ch-header__btn--invite" onClick={() => setShowInvite(true)}>
               Invite
             </button>
           )}
-
-          <button className="hover:bg-[#F8F8F8] p-1 rounded" onClick={handleShowPinned}>
-            <PinIcon className="size-4 text-[#616061]" />
-          </button>
-
-          {/* More Options Dropdown */}
-          <div className="relative" ref={dropdownRef}>
-            <button
-              className="hover:bg-[#F8F8F8] p-1 rounded transition-colors"
-              onClick={() => setShowDropdown(!showDropdown)}
-              title="More Options"
-            >
-              <MoreVerticalIcon className="size-5 text-[#616061]" />
-            </button>
-
-            {showDropdown && (
-              <div className="absolute right-0 top-full mt-2 bg-white border border-gray-200 rounded-lg shadow-xl py-2 z-50 min-w-[180px] animate-fade-in">
-                {/* Always show for all channels */}
-                <button
-                  className="flex items-center gap-3 w-full px-4 py-3 text-sm hover:bg-gray-50 text-left transition-colors"
-                  onClick={() => {
-                    setShowDropdown(false);
-                    setShowSettings(true);
-                  }}
-                >
-                  <SettingsIcon className="size-4 text-gray-600" />
-                  <div>
-                    <div className="font-medium text-gray-900">Channel Details</div>
-                    <div className="text-xs text-gray-500">View channel information</div>
-                  </div>
-                </button>
-
-                {isPublicChannel && (
-                  <button
-                    className="flex items-center gap-3 w-full px-4 py-3 text-sm hover:bg-gray-50 text-left transition-colors border-t border-gray-100"
-                    onClick={handleShareChannel}
-                  >
-                    <ShareIcon className="size-4 text-blue-600" />
-                    <div>
-                      <div className="font-medium text-gray-900">Share Channel</div>
-                      <div className="text-xs text-gray-500">Copy invite link</div>
-                    </div>
-                  </button>
-                )}
-                
-                {isChannelCreator && (
-                  <>
-                    <div className="border-t border-gray-100 my-1"></div>
-                    <button
-                      className="flex items-center gap-3 w-full px-4 py-3 text-sm hover:bg-red-50 text-left transition-colors"
-                      onClick={handleDeleteChannel}
-                    >
-                      <TrashIcon className="size-4 text-red-600" />
-                      <div>
-                        <div className="font-medium text-red-600">Delete Channel</div>
-                        <div className="text-xs text-gray-500">Remove channel permanently</div>
-                      </div>
-                    </button>
-                  </>
-                )}
-
-              </div>
-            )}
-          </div>
         </div>
 
-        {showMembers && (
-          <MembersModal
-            members={Object.values(channel.state.members)}
-            onClose={() => setShowMembers(false)}
-          />
-        )}
-        {showPinnedMessages && (
-          <PinnedMessagesModal
-            pinnedMessages={pinnedMessages}
-            onClose={() => setShowPinnedMessages(false)}
-          />
-        )}
+        {showMembers && <MembersModal members={Object.values(channel.state.members)} onClose={() => setShowMembers(false)} />}
+        {showPinnedMessages && <PinnedMessagesModal pinnedMessages={pinnedMessages} onClose={() => setShowPinnedMessages(false)} />}
         {showInvite && <InviteModal channel={channel} onClose={() => setShowInvite(false)} />}
-        {showSettings && (
-          <ChannelSettingsModal 
-            channel={channel} 
-            onClose={() => setShowSettings(false)} 
+        {showSettings && <ChannelSettingsModal channel={channel} onClose={() => setShowSettings(false)} />}
+        {showCallHistory && (
+          <CallHistoryPanel
+            channelId={channel.id}
+            channelName={isDM ? (otherUser?.user?.name || otherUser?.user?.id) : (channel.data?.name || channel.id)}
+            onClose={() => setShowCallHistory(false)}
           />
         )}
       </div>

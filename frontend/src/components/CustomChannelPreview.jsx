@@ -13,9 +13,13 @@ const CustomChannelPreview = ({ channel, setActiveChannel, activeChannel }) => {
       className={`channel-preview-item ${isActive ? "channel-preview-item--active" : ""}`}
     >
       <HashIcon className="channel-preview-item__icon" />
-      <span className="channel-preview-item__name">{channel.data.name || channel.data.id}</span>
+      <span className="channel-preview-item__name">
+        {channel.data.name || channel.data.id}
+      </span>
       {unreadCount > 0 && (
-        <span className="channel-preview-item__badge">{unreadCount > 99 ? "99+" : unreadCount}</span>
+        <span className="channel-preview-item__badge">
+          {unreadCount > 99 ? "99+" : unreadCount}
+        </span>
       )}
     </button>
   );
