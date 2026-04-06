@@ -7,17 +7,17 @@ import * as Sentry from "@sentry/react";
 
 const STREAM_API_KEY = import.meta.env.VITE_STREAM_API_KEY;
 
+// Module-level singleton — survives React unmount/remount (page navigation)
+// Never reset these inside a component — only mutate from the connect/disconnect logic
+let _client = null;
+let _connecting = false;
+
 export const useStreamChat = () => {
   const { user } = useUser();
   const [chatClient, setChatClient] = useState(null);
-  const connectingRef = useRef(false);
-  const clientRef = useRef(null);
+  const mountedRef = useRef(true);
 
-  const {
-    data: tokenData,
-    isLoading,
-    error,
-  } = useQuery({
+  const { data: tokenData, isLoading: tokenLoading, error: tokenError } = useQuery({
     queryKey: ["streamToken"],
     queryFn: getStreamToken,
     enabled: !!user?.id,
@@ -26,57 +26,93 @@ export const useStreamChat = () => {
     retry: 2,
   });
 
+  // Track mount state so we don't setState after unmount
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => { mountedRef.current = false; };
+  }, []);
+
+  // Expose already-connected client immediately on remount (no loading flash)
+  useEffect(() => {
+    if (_client?.userID && mountedRef.current) {
+      setChatClient(_client);
+    }
+  }, []);
+
   useEffect(() => {
     if (!tokenData?.token || !user?.id || !STREAM_API_KEY) return;
-    // Already connected or connecting — skip
-    if (connectingRef.current || clientRef.current?.userID) return;
 
-    connectingRef.current = true;
+    // Already connected to the right user — just expose it
+    if (_client?.userID === user.id) {
+      if (mountedRef.current) setChatClient(_client);
+      return;
+    }
 
-    const client = StreamChat.getInstance(STREAM_API_KEY);
-    clientRef.current = client;
+    // Already in the middle of connecting — don't start another attempt
+    if (_connecting) return;
+
+    _connecting = true;
 
     const connect = async () => {
       try {
-        await client.connectUser(
+        // If a different user was connected, disconnect first
+        if (_client?.userID && _client.userID !== user.id) {
+          await _client.disconnectUser().catch(() => {});
+          _client = null;
+        }
+
+        // Get or create the singleton
+        if (!_client) {
+          _client = StreamChat.getInstance(STREAM_API_KEY);
+        }
+
+        // Double-check: singleton may have reconnected between the checks above
+        if (_client.userID === user.id) {
+          if (mountedRef.current) setChatClient(_client);
+          return;
+        }
+
+        // Build user details — ensure name is never empty (Stream requires it)
+        const name = (
+          user.fullName ||
+          `${user.firstName || ""} ${user.lastName || ""}`.trim() ||
+          user.username ||
+          user.primaryEmailAddress?.emailAddress ||
+          user.id
+        );
+
+        await _client.connectUser(
           {
             id: user.id,
-            name:
-              user.fullName ??
-              user.username ??
-              user.primaryEmailAddress?.emailAddress ??
-              user.id,
-            image: user.imageUrl ?? undefined,
+            name,
+            image: user.imageUrl || undefined,
           },
           tokenData.token
         );
-        setChatClient(client);
+
+        if (mountedRef.current) setChatClient(_client);
       } catch (err) {
-        console.log("Error connecting to stream", err);
+        console.error("Error connecting to stream", err);
         Sentry.captureException(err, {
           tags: { component: "useStreamChat" },
           extra: { userId: user?.id },
         });
-        connectingRef.current = false;
-        clientRef.current = null;
+        // Reset so a retry is possible
+        _client = null;
+      } finally {
+        _connecting = false;
       }
     };
 
     connect();
 
-    return () => {
-      // Only disconnect if we actually connected
-      if (clientRef.current?.userID) {
-        clientRef.current.disconnectUser().then(() => {
-          clientRef.current = null;
-          connectingRef.current = false;
-          setChatClient(null);
-        });
-      } else {
-        connectingRef.current = false;
-      }
-    };
+    // No cleanup disconnect — singleton stays alive across navigation.
+    // Clerk's signOut handles the final disconnect.
   }, [tokenData?.token, user?.id]);
 
-  return { chatClient, isLoading, error };
+  return {
+    chatClient,
+    isLoading: (tokenLoading || (!chatClient && !!user?.id)) && !tokenError,
+    error: tokenError ?? null,
+  };
 };

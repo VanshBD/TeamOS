@@ -49,8 +49,8 @@ export const buildCallEndedText = (callId, startTime, endTime, channelId) =>
 export const buildCallMissedText = (callId, startTime, channelId, missedBy) =>
   `__CALL__${JSON.stringify({ callId, channelId, startTime, status: "missed", missedBy })}`;
 
-const handledKeyFor = (userId) => `slackclone_handled_call_ids_${userId}`;
-const joinedKeyFor = (userId) => `slackclone_joined_call_ids_${userId}`;
+const handledKeyFor = (userId) => `teamos_handled_call_ids_${userId}`;
+const joinedKeyFor = (userId) => `teamos_joined_call_ids_${userId}`;
 
 const safeReadSet = (raw) => {
   try {
@@ -95,7 +95,7 @@ export const markCallJoinedForUser = (userId, callId) => {
   safeWriteSet(key, set);
 
   try {
-    window.dispatchEvent(new CustomEvent("slackclone_call_joined", { detail: { callId } }));
+    window.dispatchEvent(new CustomEvent("teamos_call_joined", { detail: { callId } }));
   } catch {
     // ignore
   }

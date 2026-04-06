@@ -225,28 +225,31 @@
   .emoji-dropdown { position: fixed !important; bottom: 70px !important; left: 8px !important; right: 8px !important; width: auto !important; }
 }
 
-/* ── HAMBURGER IN CHANNEL HEADER (mobile only) ──────────── */
+/* ── BACK ARROW IN CHANNEL HEADER (mobile only) ─────────── */
 .ch-header__hamburger {
   display: none; /* hidden on desktop */
   align-items: center; justify-content: center;
-  width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
-  background: rgba(109,40,217,.15);
-  border: 1px solid rgba(109,40,217,.25);
-  color: #c4b5fd; cursor: pointer;
-  transition: all .18s cubic-bezier(.4,0,.2,1);
-  margin-right: 4px;
+  width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+  background: transparent;
+  border: none;
+  color: rgba(196,181,253,.8); cursor: pointer;
+  transition: color .15s, background .15s;
+  margin-right: 0;
+  padding: 0;
 }
 .ch-header__hamburger:hover {
-  background: rgba(109,40,217,.28);
-  color: #fff;
-  box-shadow: 0 0 12px rgba(109,40,217,.3);
+  background: rgba(109,40,217,.15);
+  color: #c4b5fd;
+}
+.ch-header__hamburger:active {
+  background: rgba(109,40,217,.25);
+  transform: scale(.92);
 }
 
 /* Mobile topbar — completely hidden (we use ch-header instead) */
 .mobile-topbar { display: none !important; }
 
 @media (max-width: 899px) {
-  /* Show hamburger inside channel header on mobile */
   .ch-header__hamburger { display: flex; }
 }
 

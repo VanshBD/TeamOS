@@ -84,3 +84,19 @@ export async function getCallHistory(channelId) {
   const res = await axiosInstance.get(`/chat/channels/${encodeURIComponent(channelId)}/call-history`);
   return res.data;
 }
+
+// ── Channel member management ──────────────────────────────────
+export async function removeMemberApi(channelId, memberId) {
+  const res = await axiosInstance.delete(`/chat/channels/${encodeURIComponent(channelId)}/members/${encodeURIComponent(memberId)}`);
+  return res.data;
+}
+
+export async function banMemberApi(channelId, memberId) {
+  const res = await axiosInstance.post(`/chat/channels/${encodeURIComponent(channelId)}/members/${encodeURIComponent(memberId)}/ban`);
+  return res.data;
+}
+
+export async function unbanMemberApi(channelId, memberId) {
+  const res = await axiosInstance.delete(`/chat/channels/${encodeURIComponent(channelId)}/members/${encodeURIComponent(memberId)}/ban`);
+  return res.data;
+}

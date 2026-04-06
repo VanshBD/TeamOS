@@ -1,12 +1,11 @@
 # TeamOS — UI Design Brief
-## Complete Functional & Visual Reference for AI UI Prompt Generation
 
 ---
 
 ## Project Overview
 
-**App Name:** TeamOS (branded as "Slap")
-**Type:** Real-time team messaging app (Slack/WhatsApp hybrid)
+**App Name:** TeamOS
+**Type:** Real-time team messaging app
 **Stack:** React + Vite frontend, Node.js/Express backend, Stream Chat SDK, Clerk auth
 **Current Color Palette:** Deep purple/violet gradient sidebar (`#1a0b2e → #4a154b`), white chat area, blue message bubbles (`#2563eb`)
 
@@ -47,7 +46,7 @@
 ### 1. SIDEBAR
 
 **Header:**
-- App logo (36×36px rounded) + "Slap" brand name (gradient text, Monaco font)
+- App logo (36×36px rounded) + "TeamOS" brand name (gradient text, Monaco font)
 - Clerk UserButton (avatar with dropdown for profile/sign out)
 - Mobile: ✕ close button
 

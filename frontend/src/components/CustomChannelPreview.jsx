@@ -2,7 +2,7 @@ import { HashIcon } from "lucide-react";
 
 const CustomChannelPreview = ({ channel, setActiveChannel, activeChannel }) => {
   const isActive = activeChannel?.id === channel.id;
-  const isDM = channel.data.member_count === 2 && channel.data.id.includes("user_");
+  const isDM = !channel.data?.name && Object.keys(channel.state?.members || {}).length === 2;
   if (isDM) return null;
 
   const unreadCount = channel.countUnread();

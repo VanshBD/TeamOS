@@ -210,7 +210,7 @@ const CustomMessage = React.memo(() => {
 // ── Friend profile panel — renders in place of chat area ────────
 import { removeFriend } from "../lib/api";
 
-const FriendProfilePanel = ({ friend, onClose, onFriendRemoved, chatClient, onNavigate }) => {
+const FriendProfilePanel = ({ friend, onClose, onFriendRemoved, chatClient, onNavigate, onBack }) => {
   const [pinnedMessages, setPinnedMessages] = useState([]);
   const [messageCount, setMessageCount] = useState(0);
   const [callCount, setCallCount] = useState(0);
@@ -293,7 +293,7 @@ const FriendProfilePanel = ({ friend, onClose, onFriendRemoved, chatClient, onNa
 
       {/* Header bar */}
       <div style={{ display:"flex", alignItems:"center", gap:12, padding:"14px 18px", borderBottom:"1px solid rgba(255,255,255,.06)", flexShrink:0, background:"rgba(109,40,217,.04)" }}>
-        <button onClick={onClose} style={{ display:"flex", alignItems:"center", justifyContent:"center", width:34, height:34, borderRadius:10, background:"rgba(255,255,255,.06)", border:"1px solid rgba(255,255,255,.1)", color:"rgba(241,240,255,.7)", cursor:"pointer", flexShrink:0 }}>
+        <button onClick={onBack || onClose} style={{ display:"flex", alignItems:"center", justifyContent:"center", width:34, height:34, borderRadius:10, background:"rgba(255,255,255,.06)", border:"1px solid rgba(255,255,255,.1)", color:"rgba(241,240,255,.7)", cursor:"pointer", flexShrink:0 }}>
           <ArrowLeftIcon style={{ width:16, height:16 }} />
         </button>
         <span style={{ fontSize:15, fontWeight:700, color:"#f1f0ff" }}>Profile</span>
@@ -434,7 +434,6 @@ const HomePage = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [activeChannel, setActiveChannel] = useState(null);
   const [searchParams, setSearchParams] = useSearchParams();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("messages");
   const [replyingTo, setReplyingTo] = useState(null);
   const [winW, setWinW] = useState(typeof window !== "undefined" ? window.innerWidth : 1200);
@@ -443,6 +442,23 @@ const HomePage = () => {
   const navigate = useNavigate();
 
   const isMobile = winW < 900;
+
+  // ── Mobile view state: "list" = show sidebar, "chat" = show chat ──
+  // On mobile we never show both at once — pure WhatsApp-style navigation
+  const [mobileView, setMobileView] = useState("list"); // "list" | "chat"
+
+  // When a channel is selected on mobile, switch to chat view
+  const selectChannel = (ch) => {
+    setSearchParams({ channel: ch.id });
+    setActiveChannel(ch);
+    setFriendProfileData(null);
+    if (isMobile) setMobileView("chat");
+  };
+
+  // Back button on mobile — go back to list
+  const goBackToList = () => {
+    setMobileView("list");
+  };
 
   // ── Detail panels (rendered at root, outside Channel tree) ──
   const [friendProfileData, setFriendProfileData] = useState(null);
@@ -454,21 +470,23 @@ const HomePage = () => {
       if (channelId) {
         const ch = chatClient.channel("messaging", channelId);
         setActiveChannel(ch);
+        setFriendProfileData(null);
+        if (isMobile) setMobileView("chat");
+      } else {
+        if (isMobile) setMobileView("list");
       }
     }
   }, [chatClient, searchParams]);
 
   useEffect(() => {
-    const handler = () => setSidebarOpen(true);
+    const handler = () => { if (isMobile) setMobileView("list"); };
     window.addEventListener("teamos:open-sidebar", handler);
     return () => window.removeEventListener("teamos:open-sidebar", handler);
-  }, []);
+  }, [isMobile]);
 
-  // On mobile, auto-open sidebar when no channel is selected
+  // On mobile, always start at list view when no channel selected
   useEffect(() => {
-    if (isMobile && !activeChannel) {
-      setSidebarOpen(true);
-    }
+    if (isMobile && !activeChannel) setMobileView("list");
   }, [isMobile, activeChannel]);
 
   useEffect(() => {
@@ -503,11 +521,25 @@ const HomePage = () => {
     const computeUnread = () => {
       let dms = 0, channels = 0;
       Object.values(chatClient.activeChannels || {}).forEach((ch) => {
-        const count = ch.countUnread();
-        if (!count) return;
-        const isDM = ch.data?.member_count === 2 && ch.id?.includes("-");
-        if (isDM) dms += count;
-        else channels += count;
+        // Count only real unread messages — skip __CALL__ system messages
+        const messages = Object.values(ch.state?.messages || {});
+        const lastRead = ch.state?.read?.[chatClient.userID]?.last_read;
+        const lastReadTime = lastRead ? new Date(lastRead).getTime() : 0;
+
+        const realUnread = messages.filter((m) => {
+          if (!m?.created_at) return false;
+          if (m.user?.id === chatClient.userID) return false; // own messages
+          if (typeof m.text === "string" && m.text.startsWith("__CALL__")) return false; // system call msgs
+          return new Date(m.created_at).getTime() > lastReadTime;
+        }).length;
+
+        if (!realUnread) return;
+
+        // Reliable DM detection: private=false is a channel; member_count===2 with no name is a DM
+        const data = ch.data || {};
+        const isDM = !data.name && Object.keys(ch.state?.members || {}).length === 2;
+        if (isDM) dms += realUnread;
+        else channels += realUnread;
       });
       setDmUnread(dms);
       setChannelUnread(channels);
@@ -535,29 +567,13 @@ const HomePage = () => {
     overflow: "hidden", background: "#080810", zIndex: 0,
   };
 
-  const sidebarStyle = isMobile ? {
-    position: "absolute", top: 0, left: 0, bottom: 0,
-    width: 280, height: "100%",
-    display: "flex", flexDirection: "column",
-    overflow: "hidden", background: "#0a0a12",
-    borderRight: "1px solid rgba(109,40,217,.18)",
-    zIndex: 200,
-    transform: sidebarOpen ? "translateX(0)" : "translateX(-100%)",
-    transition: "transform .28s cubic-bezier(.4,0,.2,1)",
-    boxShadow: sidebarOpen ? "4px 0 40px rgba(0,0,0,.8)" : "none",
-    flexShrink: 0,
-  } : {
+  // Desktop sidebar — always visible, fixed width
+  const sidebarStyle = {
     position: "relative", width: 260, minWidth: 260, maxWidth: 260,
     height: "100%", display: "flex", flexDirection: "column",
     overflow: "hidden", background: "#0a0a12",
     borderRight: "1px solid rgba(109,40,217,.18)",
     zIndex: 10, flexShrink: 0,
-  };
-
-  const overlayStyle = {
-    position: "absolute", inset: 0,
-    background: "rgba(0,0,0,.75)", backdropFilter: "blur(4px)",
-    zIndex: 199, cursor: "pointer",
   };
 
   const chatStyle = {
@@ -566,7 +582,7 @@ const HomePage = () => {
     overflow: "hidden", background: "#0f1117",
   };
 
-  const closeSidebar = () => setSidebarOpen(false);
+  const closeSidebar = () => {}; // no-op on desktop; mobile uses mobileView
 
   const panelContextValue = {
     openFriendProfile: (friend) => setFriendProfileData(friend),
@@ -632,174 +648,151 @@ const HomePage = () => {
           <div className="app-shell-chat-root">
             <IncomingCallManager />
 
-            {isMobile && sidebarOpen && (
-              <div style={overlayStyle} onClick={closeSidebar} />
-            )}
-
-            {/* ── SIDEBAR ── */}
-            <aside style={sidebarStyle}>
-              <div style={{ display: "flex", flexDirection: "column", height: "100%", overflow: "hidden" }}>
-                {/* Header */}
+            {isMobile ? (
+              /* ══ MOBILE: WhatsApp-style two-view navigation ══ */
+              <>
+                {/* LIST VIEW — full-screen contact/channel picker */}
                 <div style={{
-                  display: "flex", alignItems: "center", justifyContent: "space-between",
-                  padding: "14px 14px 10px", borderBottom: "1px solid rgba(109,40,217,.12)",
-                  flexShrink: 0, background: "rgba(109,40,217,.04)",
+                  position: "absolute", inset: 0, zIndex: 10,
+                  display: "flex", flexDirection: "column", background: "#0a0a12",
+                  transform: mobileView === "list" ? "translateX(0)" : "translateX(-100%)",
+                  transition: "transform .3s cubic-bezier(.4,0,.2,1)",
+                  willChange: "transform",
                 }}>
-                  <div className="brand-container">
-                    <img src="/logo.png" alt="Logo" className="brand-logo" />
-                    <span className="brand-name">Slap</span>
-                  </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <button
-                      onClick={() => navigate("/profile")}
-                      title="My Profile"
-                      style={{
-                        width: 32, height: 32, borderRadius: "50%", padding: 0,
-                        border: "2px solid rgba(109,40,217,.35)", cursor: "pointer",
-                        overflow: "hidden", background: "linear-gradient(135deg,#6d28d9,#9333ea)",
-                        flexShrink: 0, transition: "border-color .18s, box-shadow .18s",
-                      }}
-                      onMouseEnter={e => { e.currentTarget.style.borderColor = "rgba(109,40,217,.7)"; e.currentTarget.style.boxShadow = "0 0 12px rgba(109,40,217,.4)"; }}
-                      onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(109,40,217,.35)"; e.currentTarget.style.boxShadow = "none"; }}
-                    >
-                      {user?.imageUrl
-                        ? <img src={user.imageUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
-                        : <span style={{ color: "#fff", fontSize: 12, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", width: "100%", height: "100%" }}>
-                            {(user?.firstName || user?.username || "?")[0].toUpperCase()}
-                          </span>
-                      }
-                    </button>
-                    {isMobile && (
-                      <button onClick={closeSidebar} aria-label="Close sidebar" style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 28, height: 28, borderRadius: 8, background: "rgba(255,255,255,.08)", border: "1px solid rgba(255,255,255,.1)", color: "rgba(255,255,255,.7)", cursor: "pointer", flexShrink: 0 }}>
-                        <CloseIcon className="w-4 h-4" />
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                {/* Tabs */}
-                <div className="sidebar-tabs">
-                  {TABS.map(({ id, label, Icon }) => {
-                    const badge = id === "people" ? friendRequestCount
-                      : id === "messages" ? dmUnread
-                      : id === "channels" ? channelUnread
-                      : 0;
-                    const badgeLabel = badge > 5 ? "5+" : badge > 0 ? String(badge) : null;
-                    return (
-                      <button
-                        key={id}
-                        onClick={() => {
-                          setActiveTab(id);
-                          if (id === "people") setFriendRequestCount(0);
-                        }}
-                        className={`sidebar-tab ${activeTab === id ? "sidebar-tab--active" : ""}`}
-                      >
-                        <div style={{ position: "relative", display: "inline-flex" }}>
-                          <Icon className="w-4 h-4" />
-                          {badgeLabel && <span className="tab-badge">{badgeLabel}</span>}
-                        </div>
-                        <span>{label}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-
-                {/* Tab content */}
-                <div className="sidebar-scroll-area" style={{ flex: "1 1 0", overflowY: "auto", overflowX: "hidden", minHeight: 0, scrollbarWidth: "none", overscrollBehavior: "contain" }}>
-                  {activeTab === "messages" && (
-                    <div style={{ padding: "8px 0" }}>
-                      <div className="sidebar__section-header">
-                        <MessageSquareIcon className="w-3.5 h-3.5" />
-                        <span>Friends</span>
-                      </div>
-                      <FriendsList
-                        activeChannel={activeChannel}
-                        onClose={closeSidebar}
-                      />
+                  {/* Header */}
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", borderBottom: "1px solid rgba(109,40,217,.15)", flexShrink: 0, background: "linear-gradient(180deg,rgba(109,40,217,.1) 0%,transparent 100%)" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                      <img src="/logo-2.png" alt="TeamOS" style={{ width: 34, height: 34, borderRadius: 10, objectFit: "cover", boxShadow: "0 0 12px rgba(109,40,217,.5)" }} />
+                      <span style={{ fontSize: 17, fontWeight: 800, letterSpacing: "-.02em", background: "linear-gradient(135deg,#c4b5fd,#a78bfa)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>TeamOS</span>
                     </div>
-                  )}
-
-                  {activeTab === "channels" && (
-                    <ChannelsPanel
-                      chatClient={chatClient}
-                      activeChannel={activeChannel}
-                      setActiveChannel={(ch) => {
-                        setSearchParams({ channel: ch.id });
-                        setActiveChannel(ch);
-                      }}
-                      onCreateChannel={() => setIsCreateModalOpen(true)}
-                      onClose={closeSidebar}
-                    />
-                  )}
-
-                  {activeTab === "people" && <PeoplePanel />}
-                </div>
-              </div>
-            </aside>
-
-            {/* ── MAIN CHAT ── */}
-            <div className="app-chat" style={chatStyle}>
-              {!activeChannel ? (
-                <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16, padding: "40px 20px", height: "100%" }}>
-                  {/* Mobile: always show a menu button on the empty state */}
-                  {isMobile && (
-                    <button
-                      onClick={() => setSidebarOpen(true)}
-                      style={{
-                        position: "absolute", top: 16, left: 16,
-                        display: "flex", alignItems: "center", gap: 8,
-                        padding: "10px 16px", borderRadius: 12,
-                        background: "rgba(109,40,217,.2)", border: "1px solid rgba(109,40,217,.35)",
-                        color: "#a78bfa", cursor: "pointer", fontSize: 13, fontWeight: 600,
-                      }}
-                    >
-                      <svg width="16" height="16" viewBox="0 0 18 18" fill="none">
-                        <rect y="2" width="18" height="2" rx="1" fill="currentColor"/>
-                        <rect y="8" width="18" height="2" rx="1" fill="currentColor"/>
-                        <rect y="14" width="18" height="2" rx="1" fill="currentColor"/>
-                      </svg>
-                      Menu
+                    <button onClick={() => navigate("/profile")} style={{ width: 36, height: 36, borderRadius: "50%", padding: 0, border: "2px solid rgba(109,40,217,.4)", cursor: "pointer", overflow: "hidden", background: "linear-gradient(135deg,#6d28d9,#9333ea)", flexShrink: 0 }}>
+                      {user?.imageUrl ? <img src={user.imageUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} /> : <span style={{ color: "#fff", fontSize: 14, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", width: "100%", height: "100%" }}>{(user?.firstName || user?.username || "?")[0].toUpperCase()}</span>}
                     </button>
-                  )}
-                  <div style={{ fontSize: 56, filter: "drop-shadow(0 0 24px rgba(109,40,217,.5))", animation: "emptyFloat 3s ease-in-out infinite" }}>💬</div>
-                  <div style={{ textAlign: "center" }}>
-                    <p style={{ fontSize: 20, fontWeight: 700, color: "#F9FAFB", margin: "0 0 8px" }}>No conversation selected</p>
-                    <p style={{ fontSize: 14, color: "#6B7280", margin: 0, maxWidth: 280, lineHeight: 1.6 }}>
-                      {isMobile ? "Tap Menu to pick a channel or friend" : "Pick a channel or message a friend from the sidebar"}
-                    </p>
                   </div>
-                  {isMobile && (
-                    <button
-                      onClick={() => setSidebarOpen(true)}
-                      style={{ padding: "12px 28px", borderRadius: 12, border: "none", cursor: "pointer", background: "linear-gradient(135deg,#6d28d9,#9333ea)", color: "#fff", fontSize: 14, fontWeight: 700 }}
-                    >
-                      Open Menu
-                    </button>
+                  {/* Tabs */}
+                  <div className="sidebar-tabs">
+                    {TABS.map(({ id, label, Icon }) => {
+                      const badge = id === "people" ? friendRequestCount : id === "messages" ? dmUnread : id === "channels" ? channelUnread : 0;
+                      const badgeLabel = badge > 5 ? "5+" : badge > 0 ? String(badge) : null;
+                      return (
+                        <button key={id} onClick={() => { setActiveTab(id); if (id === "people") setFriendRequestCount(0); }} className={`sidebar-tab ${activeTab === id ? "sidebar-tab--active" : ""}`}>
+                          <div style={{ position: "relative", display: "inline-flex" }}>
+                            <Icon className="w-4 h-4" />
+                            {badgeLabel && <span className="tab-badge">{badgeLabel}</span>}
+                          </div>
+                          <span>{label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {/* Tab content */}
+                  <div className="sidebar-scroll-area" style={{ flex: "1 1 0", overflowY: "auto", overflowX: "hidden", minHeight: 0 }}>
+                    {activeTab === "messages" && (
+                      <div style={{ padding: "8px 0" }}>
+                        <div className="sidebar__section-header"><MessageSquareIcon className="w-3.5 h-3.5" /><span>Friends</span></div>
+                        <FriendsList activeChannel={activeChannel} onClose={() => {}} onSelectChannel={selectChannel} />
+                      </div>
+                    )}
+                    {activeTab === "channels" && (
+                      <ChannelsPanel chatClient={chatClient} activeChannel={activeChannel} setActiveChannel={selectChannel} onCreateChannel={() => setIsCreateModalOpen(true)} onClose={() => {}} />
+                    )}
+                    {activeTab === "people" && <PeoplePanel />}
+                  </div>
+                </div>
+
+                {/* CHAT VIEW — full-screen chat */}
+                <div style={{
+                  position: "absolute", inset: 0, zIndex: 10,
+                  display: "flex", flexDirection: "column", background: "#0f1117",
+                  transform: mobileView === "chat" ? "translateX(0)" : "translateX(100%)",
+                  transition: "transform .3s cubic-bezier(.4,0,.2,1)",
+                  willChange: "transform",
+                }}>
+                  <div className="app-chat" style={{ flex: "1 1 0", minWidth: 0, height: "100%", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+                    {friendProfileData ? (
+                      <FriendProfilePanel friend={friendProfileData} onClose={() => { setFriendProfileData(null); goBackToList(); }} onFriendRemoved={() => { setFriendProfileData(null); setActiveChannel(null); goBackToList(); }} chatClient={chatClient} onNavigate={(ch) => { selectChannel(ch); setFriendProfileData(null); }} onBack={goBackToList} />
+                    ) : activeChannel ? (
+                      <Channel channel={activeChannel}>
+                        <Window>
+                          <CustomChannelHeader onBack={goBackToList} />
+                          <PinnedMessageBanner />
+                          <LiveCallBanner />
+                          <MessageList Message={CustomMessage} disableDateSeparator={false} closeReactionPickerOnClickOutside={true} />
+                          <ChatInputWrapper replyingTo={replyingTo} onCancelReply={() => setReplyingTo(null)} onReplySent={() => setReplyingTo(null)} />
+                        </Window>
+                        <Thread />
+                        {showChannelDetail && <ChannelDetailModal onClose={() => setShowChannelDetail(false)} />}
+                      </Channel>
+                    ) : null}
+                  </div>
+                </div>
+              </>
+            ) : (
+              /* ══ DESKTOP: side-by-side layout ══ */
+              <>
+                <aside style={sidebarStyle}>
+                  <div style={{ display: "flex", flexDirection: "column", height: "100%", overflow: "hidden" }}>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 14px", borderBottom: "1px solid rgba(109,40,217,.15)", flexShrink: 0, background: "linear-gradient(180deg,rgba(109,40,217,.08) 0%,transparent 100%)" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 9, minWidth: 0 }}>
+                        <img src="/logo-2.png" alt="TeamOS" style={{ width: 36, height: 36, borderRadius: 10, objectFit: "cover", flexShrink: 0, boxShadow: "0 0 14px rgba(109,40,217,.5),0 2px 8px rgba(0,0,0,.4)" }} />
+                        <span style={{ fontSize: 16, fontWeight: 800, letterSpacing: "-.02em", background: "linear-gradient(135deg,#c4b5fd,#a78bfa,#818cf8)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", whiteSpace: "nowrap" }}>TeamOS</span>
+                      </div>
+                      <button onClick={() => navigate("/profile")} title="My Profile" style={{ width: 34, height: 34, borderRadius: "50%", padding: 0, border: "2px solid rgba(109,40,217,.4)", cursor: "pointer", overflow: "hidden", background: "linear-gradient(135deg,#6d28d9,#9333ea)", flexShrink: 0, transition: "border-color .18s,box-shadow .18s" }} onMouseEnter={e => { e.currentTarget.style.borderColor = "rgba(147,51,234,.8)"; e.currentTarget.style.boxShadow = "0 0 14px rgba(109,40,217,.5)"; }} onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(109,40,217,.4)"; e.currentTarget.style.boxShadow = "none"; }}>
+                        {user?.imageUrl ? <img src={user.imageUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} /> : <span style={{ color: "#fff", fontSize: 13, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", width: "100%", height: "100%" }}>{(user?.firstName || user?.username || "?")[0].toUpperCase()}</span>}
+                      </button>
+                    </div>
+                    <div className="sidebar-tabs">
+                      {TABS.map(({ id, label, Icon }) => {
+                        const badge = id === "people" ? friendRequestCount : id === "messages" ? dmUnread : id === "channels" ? channelUnread : 0;
+                        const badgeLabel = badge > 5 ? "5+" : badge > 0 ? String(badge) : null;
+                        return (
+                          <button key={id} onClick={() => { setActiveTab(id); if (id === "people") setFriendRequestCount(0); }} className={`sidebar-tab ${activeTab === id ? "sidebar-tab--active" : ""}`}>
+                            <div style={{ position: "relative", display: "inline-flex" }}><Icon className="w-4 h-4" />{badgeLabel && <span className="tab-badge">{badgeLabel}</span>}</div>
+                            <span>{label}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <div className="sidebar-scroll-area" style={{ flex: "1 1 0", overflowY: "auto", overflowX: "hidden", minHeight: 0, scrollbarWidth: "none", overscrollBehavior: "contain" }}>
+                      {activeTab === "messages" && (
+                        <div style={{ padding: "8px 0" }}>
+                          <div className="sidebar__section-header"><MessageSquareIcon className="w-3.5 h-3.5" /><span>Friends</span></div>
+                          <FriendsList activeChannel={activeChannel} onClose={() => {}} onSelectChannel={selectChannel} />
+                        </div>
+                      )}
+                      {activeTab === "channels" && <ChannelsPanel chatClient={chatClient} activeChannel={activeChannel} setActiveChannel={selectChannel} onCreateChannel={() => setIsCreateModalOpen(true)} onClose={() => {}} />}
+                      {activeTab === "people" && <PeoplePanel />}
+                    </div>
+                  </div>
+                </aside>
+
+                <div className="app-chat" style={chatStyle}>
+                  {!activeChannel ? (
+                    <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16, padding: "40px 20px", height: "100%" }}>
+                      <div style={{ fontSize: 56, filter: "drop-shadow(0 0 24px rgba(109,40,217,.5))", animation: "emptyFloat 3s ease-in-out infinite" }}>💬</div>
+                      <div style={{ textAlign: "center" }}>
+                        <p style={{ fontSize: 20, fontWeight: 700, color: "#F9FAFB", margin: "0 0 8px" }}>No conversation selected</p>
+                        <p style={{ fontSize: 14, color: "#6B7280", margin: 0, maxWidth: 280, lineHeight: 1.6 }}>Pick a channel or message a friend from the sidebar</p>
+                      </div>
+                    </div>
+                  ) : friendProfileData ? (
+                    <FriendProfilePanel friend={friendProfileData} onClose={() => setFriendProfileData(null)} onFriendRemoved={() => { setFriendProfileData(null); setActiveChannel(null); }} chatClient={chatClient} onNavigate={(ch) => { selectChannel(ch); setFriendProfileData(null); }} />
+                  ) : (
+                    <Channel channel={activeChannel}>
+                      <Window>
+                        <CustomChannelHeader />
+                        <PinnedMessageBanner />
+                        <LiveCallBanner />
+                        <MessageList Message={CustomMessage} disableDateSeparator={false} closeReactionPickerOnClickOutside={true} />
+                        <ChatInputWrapper replyingTo={replyingTo} onCancelReply={() => setReplyingTo(null)} onReplySent={() => setReplyingTo(null)} />
+                      </Window>
+                      <Thread />
+                      {showChannelDetail && <ChannelDetailModal onClose={() => setShowChannelDetail(false)} />}
+                    </Channel>
                   )}
                 </div>
-              ) : friendProfileData ? (
-                /* ── Friend profile panel — replaces chat area ── */
-                <FriendProfilePanel
-                  friend={friendProfileData}
-                  onClose={() => setFriendProfileData(null)}
-                  onFriendRemoved={() => { setFriendProfileData(null); setActiveChannel(null); }}
-                  chatClient={chatClient}
-                  onNavigate={(ch) => { setSearchParams({ channel: ch.id }); setFriendProfileData(null); }}
-                />
-              ) : (
-                <Channel channel={activeChannel}>
-                  <Window>
-                    <CustomChannelHeader />
-                    <PinnedMessageBanner />
-                    <LiveCallBanner />
-                    <MessageList Message={CustomMessage} disableDateSeparator={false} closeReactionPickerOnClickOutside={true} />
-                    <ChatInputWrapper replyingTo={replyingTo} onCancelReply={() => setReplyingTo(null)} onReplySent={() => setReplyingTo(null)} />
-                  </Window>
-                  <Thread />
-                  {showChannelDetail && <ChannelDetailModal onClose={() => setShowChannelDetail(false)} />}
-                </Channel>
-              )}
-            </div>
+              </>
+            )}
           </div>
 
           {isCreateModalOpen && <CreateChannelModal onClose={() => setIsCreateModalOpen(false)} />}

@@ -376,3 +376,97 @@ export const votePoll = async (req, res) => {
     return res.status(500).json({ message: "Failed to record vote", detail: error?.response?.data?.message || error?.message });
   }
 };
+
+// ── Remove a member from a channel (owner/admin only) ──────────
+export const removeMember = async (req, res) => {
+  try {
+    const requesterId = req.auth().userId;
+    const { channelId, memberId } = req.params;
+
+    // Get channel via server-side client — use channel() + query() for state
+    const channel = streamClient.channel("messaging", channelId);
+    const channelData = await channel.query({ state: true });
+
+    // Verify requester is owner/admin using channel data
+    const createdById = channelData.channel?.created_by?.id || channelData.channel?.created_by_id;
+    const members = channelData.members || [];
+    const requesterMember = members.find(m => m.user_id === requesterId || m.user?.id === requesterId);
+    const isOwner =
+      createdById === requesterId ||
+      requesterMember?.channel_role === "owner" ||
+      requesterMember?.channel_role === "admin";
+
+    if (!isOwner) return res.status(403).json({ message: "Only the channel owner can remove members" });
+
+    // Remove member using server-side channel
+    await channel.removeMembers([memberId]);
+    return res.status(200).json({ ok: true });
+  } catch (error) {
+    console.error("removeMember error:", error?.message || error);
+    return res.status(500).json({ message: "Failed to remove member", detail: error?.message });
+  }
+};
+
+// ── Ban a member from a channel (owner/admin only) ─────────────
+// Banned users keep message history but can't send new messages or see channel info
+export const banMember = async (req, res) => {
+  try {
+    const requesterId = req.auth().userId;
+    const { channelId, memberId } = req.params;
+
+    const channel = streamClient.channel("messaging", channelId);
+    const channelData = await channel.query({ state: true });
+
+    const createdById = channelData.channel?.created_by?.id || channelData.channel?.created_by_id;
+    const members = channelData.members || [];
+    const requesterMember = members.find(m => m.user_id === requesterId || m.user?.id === requesterId);
+    const isOwner =
+      createdById === requesterId ||
+      requesterMember?.channel_role === "owner" ||
+      requesterMember?.channel_role === "admin";
+
+    if (!isOwner) return res.status(403).json({ message: "Only the channel owner can ban members" });
+
+    // Ban user from this specific channel — they keep history but can't interact
+    await streamClient.banUser(memberId, {
+      banned_by_id: requesterId,
+      channel_cid: `messaging:${channelId}`,
+      reason: "Banned by channel owner",
+    });
+
+    // Remove from channel so they can't see new messages or member list
+    await channel.removeMembers([memberId]);
+
+    return res.status(200).json({ ok: true });
+  } catch (error) {
+    console.error("banMember error:", error?.message || error);
+    return res.status(500).json({ message: "Failed to ban member", detail: error?.message });
+  }
+};
+
+// ── Unban a member from a channel (owner/admin only) ───────────
+export const unbanMember = async (req, res) => {
+  try {
+    const requesterId = req.auth().userId;
+    const { channelId, memberId } = req.params;
+
+    const channel = streamClient.channel("messaging", channelId);
+    const channelData = await channel.query({ state: true });
+
+    const createdById = channelData.channel?.created_by?.id || channelData.channel?.created_by_id;
+    const members = channelData.members || [];
+    const requesterMember = members.find(m => m.user_id === requesterId || m.user?.id === requesterId);
+    const isOwner =
+      createdById === requesterId ||
+      requesterMember?.channel_role === "owner" ||
+      requesterMember?.channel_role === "admin";
+
+    if (!isOwner) return res.status(403).json({ message: "Only the channel owner can unban members" });
+
+    await streamClient.unbanUser(memberId, { channel_cid: `messaging:${channelId}` });
+    return res.status(200).json({ ok: true });
+  } catch (error) {
+    console.error("unbanMember error:", error?.message || error);
+    return res.status(500).json({ message: "Failed to unban member", detail: error?.message });
+  }
+};

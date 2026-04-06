@@ -98,8 +98,8 @@ const IncomingCallManager = () => {
       });
     };
 
-    window.addEventListener("slackclone_call_joined", handler);
-    return () => window.removeEventListener("slackclone_call_joined", handler);
+    window.addEventListener("teamos_call_joined", handler);
+    return () => window.removeEventListener("teamos_call_joined", handler);
   }, []);
 
   const startedEventHandler = useMemo(() => {

@@ -7,11 +7,10 @@ import PinnedMessagesModal from "./PinnedMessagesModal";
 import InviteModal from "./InviteModal";
 import ChannelSettingsModal from "./ChannelSettingsModal";
 import { PanelContext } from "../pages/HomePage";
-import CallHistoryPanel from "./CallHistoryPanel";
 import { buildCallMessageText } from "../lib/callMessages";
 import toast from "react-hot-toast";
 
-const CustomChannelHeader = () => {
+const CustomChannelHeader = ({ onBack }) => {
   const { channel } = useChannelStateContext();
   const { user } = useUser();
   const { openFriendProfile, openChannelDetail } = useContext(PanelContext);
@@ -22,7 +21,6 @@ const CustomChannelHeader = () => {
   const [showMembers, setShowMembers] = useState(false);
   const [showPinnedMessages, setShowPinnedMessages] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
-  const [showCallHistory, setShowCallHistory] = useState(false);
   const [pinnedMessages, setPinnedMessages] = useState([]);
   const dropdownRef = useRef(null);
 
@@ -120,19 +118,17 @@ const CustomChannelHeader = () => {
   return (
     <>
       <div className="ch-header">
-        {/* Hamburger — mobile only, integrated into header */}
+        {/* Back/hamburger — mobile only */}
         <button
           className="ch-header__hamburger"
           onClick={() => {
-            // dispatch a custom event that HomePage listens to
-            window.dispatchEvent(new CustomEvent("teamos:open-sidebar"));
+            if (onBack) onBack();
+            else window.dispatchEvent(new CustomEvent("teamos:open-sidebar"));
           }}
-          aria-label="Open sidebar"
+          aria-label="Back"
         >
-          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-            <rect y="2" width="18" height="2" rx="1" fill="currentColor"/>
-            <rect y="8" width="18" height="2" rx="1" fill="currentColor"/>
-            <rect y="14" width="18" height="2" rx="1" fill="currentColor"/>
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path d="M13 4L7 10L13 16" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         </button>
 
@@ -164,10 +160,7 @@ const CustomChannelHeader = () => {
             <VideoIcon className="size-4" />
           </button>
 
-          <button className="ch-header__btn" onClick={() => setShowCallHistory(true)} title="Call History" style={{ fontSize: 16 }}>
-            🕐
-          </button>
-
+          
           {channel.data?.private && (
             <button className="ch-header__btn ch-header__btn--invite" onClick={() => setShowInvite(true)}>
               Invite
@@ -179,13 +172,6 @@ const CustomChannelHeader = () => {
         {showPinnedMessages && <PinnedMessagesModal pinnedMessages={pinnedMessages} onClose={() => setShowPinnedMessages(false)} />}
         {showInvite && <InviteModal channel={channel} onClose={() => setShowInvite(false)} />}
         {showSettings && <ChannelSettingsModal channel={channel} onClose={() => setShowSettings(false)} />}
-        {showCallHistory && (
-          <CallHistoryPanel
-            channelId={channel.id}
-            channelName={isDM ? (otherUser?.user?.name || otherUser?.user?.id) : (channel.data?.name || channel.id)}
-            onClose={() => setShowCallHistory(false)}
-          />
-        )}
       </div>
     </>
   );

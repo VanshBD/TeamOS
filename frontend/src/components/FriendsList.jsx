@@ -4,7 +4,7 @@ import { useChatContext } from "stream-chat-react";
 import { getFriends } from "../lib/api";
 import toast from "react-hot-toast";
 
-const FriendsList = ({ activeChannel, onClose }) => {
+const FriendsList = ({ activeChannel, onClose, onSelectChannel }) => {
   const { client } = useChatContext();
   const [, setSearchParams] = useSearchParams();
   const [friends, setFriends] = useState([]);
@@ -56,8 +56,12 @@ const FriendsList = ({ activeChannel, onClose }) => {
         members: [client.user.id, friend.id],
       });
       await channel.watch();
-      setSearchParams({ channel: channel.id });
-      onClose?.();
+      if (onSelectChannel) {
+        onSelectChannel(channel);
+      } else {
+        setSearchParams({ channel: channel.id });
+        onClose?.();
+      }
     } catch {
       toast.error("Failed to open conversation");
     }

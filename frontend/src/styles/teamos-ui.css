@@ -877,11 +877,16 @@ body {
   border-bottom: 1px solid rgba(255,255,255,.06);
   flex-shrink: 0; position: relative; z-index: 8;
   min-height: 52px;
+  gap: 4px;
 }
-.ch-header__left { display: flex; align-items: center; gap: 8px; min-width: 0; }
+
+@media (max-width: 899px) {
+  .ch-header { padding: 8px 10px 8px 6px; gap: 2px; }
+}
+.ch-header__left { display: flex; align-items: center; gap: 6px; min-width: 0; flex: 1; overflow: hidden; }
 .ch-header__icon { width: 15px; height: 15px; color: rgba(160,158,192,.6); flex-shrink: 0; }
-.ch-header__dm-avatar { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; border: 1.5px solid rgba(109,40,217,.3); }
-.ch-header__name { font-size: 14px; font-weight: 600; color: #f1f0ff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ch-header__dm-avatar { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; border: 1.5px solid rgba(109,40,217,.3); flex-shrink: 0; }
+.ch-header__name { font-size: 14px; font-weight: 600; color: #f1f0ff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; max-width: 100%; }
 
 .ch-header__actions { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
 .ch-header__btn {
