@@ -10,6 +10,16 @@ import { PanelContext } from "../pages/HomePage";
 import { buildCallMessageText } from "../lib/callMessages";
 import toast from "react-hot-toast";
 
+const isClerkDefault = (url) => {
+  if (!url) return true;
+  try {
+    const path = url.split("/").pop()?.split("?")[0] || "";
+    const decoded = atob(path);
+    if (decoded.includes('"type":"default"')) return true;
+  } catch { /* not base64 */ }
+  return false;
+};
+
 const CustomChannelHeader = ({ onBack }) => {
   const { channel } = useChannelStateContext();
   const { user } = useUser();
@@ -32,13 +42,20 @@ const CustomChannelHeader = ({ onBack }) => {
   const isDM = !channel.data?.name && Object.keys(channel.state.members).length === 2;
 
   // Resolve the other user's image — channel state may not have it, so fall back to a Stream query
-  const [otherUserImage, setOtherUserImage] = useState(otherUser?.user?.image || null);
+  const [otherUserImage, setOtherUserImage] = useState(
+    otherUser?.user?.image && !isClerkDefault(otherUser.user.image) ? otherUser.user.image : null
+  );
   useEffect(() => {
     if (!isDM || !otherUser?.user?.id) return;
-    if (otherUser?.user?.image) { setOtherUserImage(otherUser.user.image); return; }
+    if (otherUser?.user?.image && !isClerkDefault(otherUser.user.image)) {
+      setOtherUserImage(otherUser.user.image); return;
+    }
     // image not in channel state — query Stream for the full user object
     channel._client?.queryUsers({ id: { $eq: otherUser.user.id } }, {}, { limit: 1 })
-      .then(res => { if (res.users?.[0]?.image) setOtherUserImage(res.users[0].image); })
+      .then(res => {
+        const img = res.users?.[0]?.image;
+        if (img && !isClerkDefault(img)) setOtherUserImage(img);
+      })
       .catch(() => {});
   }, [isDM, otherUser?.user?.id, otherUser?.user?.image]);
 

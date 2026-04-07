@@ -4,6 +4,16 @@ import { useChatContext } from "stream-chat-react";
 import { getFriends } from "../lib/api";
 import toast from "react-hot-toast";
 
+const isClerkDefault = (url) => {
+  if (!url) return true;
+  try {
+    const path = url.split("/").pop()?.split("?")[0] || "";
+    const decoded = atob(path);
+    if (decoded.includes('"type":"default"')) return true;
+  } catch { /* not base64 */ }
+  return false;
+};
+
 const FriendsList = ({ activeChannel, onClose, onSelectChannel }) => {
   const { client } = useChatContext();
   const [, setSearchParams] = useSearchParams();
@@ -84,7 +94,8 @@ const FriendsList = ({ activeChannel, onClose, onSelectChannel }) => {
           const ch = client.channel("messaging", channelId, { members: [client.user.id, friend.id] });
           const unread = ch.countUnread();
           const isActive = activeChannel?.id === channelId;
-          const avatar = friend.image || su?.image;
+          const rawAvatar = friend.image || su?.image;
+          const avatar = rawAvatar && !isClerkDefault(rawAvatar) ? rawAvatar : null;
 
           return (
             <div

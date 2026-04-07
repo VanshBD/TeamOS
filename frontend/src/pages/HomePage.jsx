@@ -39,6 +39,18 @@ export const PanelContext = createContext({ openFriendProfile: () => {}, openCha
 
 const ReplyContext = createContext({ replyingTo: null, setReplyingTo: () => {} });
 
+// Clerk default avatars encode JSON in base64 — detect and treat as no image
+const isRealImage = (url) => {
+  if (!url) return false;
+  // Clerk default: URL path is a base64 blob containing {"type":"default",...}
+  try {
+    const path = url.split("/").pop()?.split("?")[0] || "";
+    const decoded = atob(path);
+    if (decoded.includes('"type":"default"')) return false;
+  } catch { /* not base64 — that's fine */ }
+  return true;
+};
+
 const highlightMessage = (msgId) => {
   const el = document.querySelector(`[data-message-id="${msgId}"]`);
   if (!el) return;
@@ -70,9 +82,10 @@ const EnhancedMessage = () => {
   const { setReplyingTo } = useContext(ReplyContext);
 
   // Resolve user image: message.user.image may be missing — fall back to Stream's user cache
-  const userImage = message.user?.image
+  const rawImage = message.user?.image
     || client?.state?.users?.[message.user?.id]?.image
     || null;
+  const userImage = isRealImage(rawImage) ? rawImage : null;
 
   const { isOwnMessage, formattedTime } = useMemo(() => {
     const isOwn = message.user?.id === client?.user?.id;
@@ -225,7 +238,7 @@ const FriendProfilePanel = ({ friend, onClose, onFriendRemoved, chatClient, onNa
   const [showPinned, setShowPinned] = useState(false);
   const [confirmRemove, setConfirmRemove] = useState(false);
   const [confirmDeleteHistory, setConfirmDeleteHistory] = useState(false);
-  const [resolvedImage, setResolvedImage] = useState(friend.image || null);
+  const [resolvedImage, setResolvedImage] = useState(isRealImage(friend.image) ? friend.image : null);
 
   const dmChannelId = chatClient?.user?.id
     ? [chatClient.user.id, friend.id].sort().join("-").slice(0, 64)
@@ -240,7 +253,8 @@ const FriendProfilePanel = ({ friend, onClose, onFriendRemoved, chatClient, onNa
         if (!cancelled) {
           setIsOnline(presRes.users?.[0]?.online ?? false);
           // Resolve image from Stream if not passed in
-          if (!friend.image && presRes.users?.[0]?.image) setResolvedImage(presRes.users[0].image);
+          const streamImg = presRes.users?.[0]?.image;
+          if (!resolvedImage && isRealImage(streamImg)) setResolvedImage(streamImg);
         }
         if (dmChannelId) {
           const dmCh = chatClient.channel("messaging", dmChannelId, { members: [chatClient.user.id, friend.id] });
