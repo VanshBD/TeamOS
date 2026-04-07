@@ -47,11 +47,23 @@ const AuthPage = () => {
         </div>
       </div>
 
-      {/* ── Right: illustration ── */}
+      {/* ── Right: full-height image panel (desktop only) ── */}
       <div className="auth-right">
         <div className="auth-image-container">
           <img src="/auth-i.png" alt="TeamOS workspace preview" className="auth-image" />
           <div className="image-overlay" />
+        </div>
+
+        {/* Floating status badges */}
+        <div className="auth-right-badge">
+          <div className="auth-badge-pill">
+            <span className="auth-badge-dot" />
+            2,400+ teams collaborating live
+          </div>
+          <div className="auth-badge-pill">
+            <span style={{ fontSize: "1rem" }}>⚡</span>
+            Real-time · Secure · Private
+          </div>
         </div>
       </div>
     </div>
