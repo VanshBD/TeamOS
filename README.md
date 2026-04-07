@@ -1,94 +1,150 @@
-<p align="center">
-  <img src="frontend/public/logo-2.png" alt="TeamOS Logo" width="140" />
-</p>
+<div align="center">
+  <img src="frontend/public/logo.png" alt="TeamOS Logo" width="80" />
+  <h1>TeamOS</h1>
+  <p>A real-time team communication platform — channels, DMs, voice calls, polls, and more.</p>
 
-<h1 align="center">TeamOS</h1>
-
-<p align="center">
-  A real-time team messaging platform — channels, direct messages, video calls, polls, reactions, location sharing, and more.
-</p>
-
----
-
-## Overview
-
-TeamOS is a full-stack real-time messaging application built for modern teams. It combines channel-based communication with rich messaging features including polls, location sharing, file uploads, emoji reactions, and video calls — all in a responsive, mobile-first interface that works like WhatsApp on mobile and like a desktop workspace on larger screens.
+  ![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)
+  ![Node.js](https://img.shields.io/badge/Node.js-Express-339933?logo=node.js&logoColor=white)
+  ![MongoDB](https://img.shields.io/badge/MongoDB-Mongoose-47A248?logo=mongodb&logoColor=white)
+  ![Stream](https://img.shields.io/badge/Stream-Chat%20%26%20Video-005FFF?logo=stream&logoColor=white)
+  ![Clerk](https://img.shields.io/badge/Clerk-Auth-6C47FF?logo=clerk&logoColor=white)
+</div>
 
 ---
 
-## Features
+## What is TeamOS?
 
-### Messaging
-- Real-time messaging via Stream Chat WebSocket — channels and direct messages
-- WhatsApp-style quoted replies with scroll-to-original
-- Emoji reactions with live counts
-- Pin/unpin messages — server-side via Stream admin API
-- Pinned message banner that cycles through all pinned messages and scrolls to each
-- Typing indicators and online presence
-
-### Rich Content
-- Polls — single and multi-select, real-time vote counts, voter names visible to creator
-- Location sharing — current GPS location with OpenStreetMap preview card
-- File and image sharing — upload to Stream CDN with inline preview
-- Camera capture — direct mobile camera upload
-- Emoji picker — searchable, 200+ emojis, inserts at cursor position
-
-### Channels
-- Public and private channels
-- Public channel search by name or ID — join in one tap
-- Invite members to private channels
-- Channel detail panel — member list, pinned messages, member count
-- Owner controls — remove members, ban members (banned users keep history but lose access)
-- Delete channel (owner only) or leave channel (members)
-
-### Video Calls
-- Start and join video calls via Stream Video SDK
-- Incoming call popup with ring animation and accept/decline
-- Live call banner when a call is active in the current channel
-- Per-channel call history with duration and status (ended/missed)
-- Call cards rendered inline in the message list
-
-### Friends & People
-- Friend system — send, accept, reject, and remove friend requests
-- People tab — search all users and send friend requests
-- Friend profile panel — view shared channels, pinned messages, message/call stats
-- Online presence — live green/gray dot on DM contacts
-- Unread badges — red count badges on channels and DMs
-
-### Mobile
-- Full WhatsApp-style two-view navigation on mobile
-- List view (contacts/channels) slides to chat view on selection
-- Back arrow in chat header returns to list — no overlay, no hamburger
-- Responsive layout — full desktop sidebar on screens ≥ 900px
-
-### Account
-- Profile page — update display name, avatar, and password
-- Clerk-powered authentication with re-verification for sensitive actions
-- Sentry error tracking on both frontend and backend
+TeamOS is a full-stack Slack-style communication app. It supports real-time messaging, voice/video calls, friend requests, public and private channels, polls, file sharing, location sharing, message pinning, reactions, and more — all wrapped in a clean dark UI.
 
 ---
 
 ## Tech Stack
 
-| Layer | Technology | Version |
-|-------|-----------|---------|
-| Frontend framework | React | 19 |
-| Build tool | Vite | 7 |
-| Styling | Tailwind CSS | 4 |
-| Authentication | Clerk | 5 |
-| Chat SDK | Stream Chat (stream-chat-react) | 13 |
-| Video SDK | Stream Video React SDK | 1 |
-| Server state | TanStack React Query | 5 |
-| HTTP client | Axios | 1 |
-| Icons | Lucide React | — |
-| Notifications | React Hot Toast | — |
-| Routing | React Router | 7 |
-| Error tracking (FE) | Sentry React | 10 |
-| Backend runtime | Node.js + Express | v5 |
-| Database | MongoDB (Mongoose) | 8 |
-| Auth middleware | Clerk Express | — |
-| Background jobs | Inngest | 3 |
-| Error tracking (BE) | Sentry Node | 10 |
+### Frontend
+| Tech | Purpose |
+|------|---------|
+| React 19 + Vite | UI framework and build tool |
+| Stream Chat React SDK | Real-time chat UI components and state |
+| Clerk (`@clerk/clerk-react`) | Authentication — sign in, sign up, user sessions |
+| React Router v7 | Client-side routing |
+| TanStack Query | Server state management and API caching |
+| Sentry (`@sentry/react`) | Frontend error tracking and performance monitoring |
+| Vercel Analytics | Page view and event analytics |
+| React Hot Toast | Toast notifications |
+| Lucide React | Icon library |
+
+### Backend
+| Tech | Purpose |
+|------|---------|
+| Node.js + Express | REST API server |
+| MongoDB + Mongoose | Database for users and friend relationships |
+| Clerk (`@clerk/express`) | JWT verification middleware — protects all routes |
+| Stream Chat Node SDK | Server-side channel management, token generation, message ops |
+| Inngest | Event-driven background jobs (user sync on signup/delete) |
+| Sentry (`@sentry/node`) | Backend error tracking |
+
+---
+
+## Features
+
+- Real-time messaging with threads, replies, and reactions
+- Voice and video calls with live call banners and call history
+- Public channels (discoverable and joinable) and private channels (invite-only)
+- Direct messages between friends
+- Friend system — send, accept, reject, and remove friends
+- Message pinning (server-side via Stream admin client)
+- Polls with single and multi-select voting
+- File and image attachments
+- Location sharing (static and live)
+- Channel management — member roles, remove/ban/unban members
+- Unread badge counts per tab (DMs, Channels, People)
+- Mobile-responsive layout with WhatsApp-style navigation
+- Automatic user sync to Stream and MongoDB on Clerk signup/delete via Inngest webhooks
+
+---
+
+## Environment Variables
+
+### Backend — `backend/.env`
+
+```env
+PORT=5001
+MONGO_URI=your_mongo_uri_here
+NODE_ENV=development
+
+CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key_here
+CLERK_SECRET_KEY=your_clerk_secret_key_here
+
+STREAM_API_KEY=your_stream_api_key_here
+STREAM_API_SECRET=your_stream_api_secret_here
+
+SENTRY_DSN=your_sentry_dsn_here
+
+INNGEST_EVENT_KEY=your_inngest_event_key_here
+INNGEST_SIGNING_KEY=your_inngest_signing_key_here
+
+CLIENT_URL=http://localhost:5173
+```
+
+### Frontend — `frontend/.env`
+
+```env
+VITE_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key_here
+VITE_STREAM_API_KEY=your_stream_api_key_here
+VITE_SENTRY_DSN=your_sentry_dsn_here
+VITE_API_BASE_URL=http://localhost:5001/api
+```
+
+### What each key does
+
+| Variable | Where | Purpose |
+|----------|-------|---------|
+| `CLERK_PUBLISHABLE_KEY` | Both | Identifies your Clerk app — used in frontend to initialize ClerkProvider and in backend to verify JWTs |
+| `CLERK_SECRET_KEY` | Backend only | Server-side Clerk SDK — used to fetch user data from Clerk API (e.g. name, avatar) and protect routes via `clerkMiddleware()` |
+| `STREAM_API_KEY` | Both | Identifies your Stream app — frontend uses it to connect the chat client |
+| `STREAM_API_SECRET` | Backend only | Signs Stream user tokens and performs admin operations (pin messages, ban users, create channels) |
+| `SENTRY_DSN` | Both | Tells Sentry where to send error reports — frontend tracks React errors, backend tracks Express errors |
+| `INNGEST_EVENT_KEY` | Backend only | Authenticates events sent to Inngest — used when triggering background functions |
+| `INNGEST_SIGNING_KEY` | Backend only | Verifies that incoming Inngest webhook calls are legitimate and not spoofed |
+| `MONGO_URI` | Backend only | MongoDB connection string — stores users and friend request records |
+| `CLIENT_URL` | Backend only | Allowed CORS origin — set to your frontend URL in production |
+
+---
+
+## Getting Started
+
+### Prerequisites
+- Node.js 18+
+- MongoDB database (local or Atlas)
+- Accounts on: [Clerk](https://clerk.com), [Stream](https://getstream.io), [Inngest](https://inngest.com), [Sentry](https://sentry.io)
+
+### Install & Run
+
+```bash
+# Backend
+cd backend
+npm install
+npm run dev
+
+# Frontend (separate terminal)
+cd frontend
+npm install
+npm run dev
+```
+
+### Inngest Setup
+
+Inngest handles two background jobs automatically:
+- `clerk/user.created` — creates the user in MongoDB and syncs them to Stream
+- `clerk/user.deleted` — removes the user from MongoDB and Stream
+
+In development, run the Inngest dev server:
+
+```bash
+npx inngest-cli@latest dev
+```
+
+Then configure your Clerk webhook to point to `http://localhost:5001/api/inngest`.
 
 ---
 
@@ -96,186 +152,37 @@ TeamOS is a full-stack real-time messaging application built for modern teams. I
 
 ```
 TeamOS/
-├── frontend/
-│   ├── public/
-│   │   ├── logo-2.png                    # TeamOS logo
-│   │   └── auth-i.png                    # Auth page illustration
-│   └── src/
-│       ├── components/
-│       │   ├── AttachmentModal.jsx        # + button sheet (gallery/camera/location/doc/poll)
-│       │   ├── CallHistoryPanel.jsx       # Per-channel call history
-│       │   ├── CallMessage.jsx            # Call card rendered in chat
-│       │   ├── ChannelDetailModal.jsx     # Channel info, members, owner controls
-│       │   ├── ChannelSettingsModal.jsx   # Channel settings view
-│       │   ├── ChannelsPanel.jsx          # Sidebar channels list with skeletons
-│       │   ├── ChatInputWrapper.jsx       # Message input with emoji/attachments/reply
-│       │   ├── CreateChannelModal.jsx     # Create public/private channel
-│       │   ├── CustomChannelHeader.jsx    # Header with back arrow, call, pin, invite
-│       │   ├── CustomChannelPreview.jsx   # Sidebar channel list item
-│       │   ├── EmojiPicker.jsx            # Searchable emoji picker
-│       │   ├── FriendProfileModal.jsx     # Friend profile with stats and shared channels
-│       │   ├── FriendsList.jsx            # DM contacts list with presence
-│       │   ├── IncomingCallManager.jsx    # Manages incoming call popup state
-│       │   ├── IncomingCallPopup.jsx      # Ring animation popup
-│       │   ├── InviteModal.jsx            # Invite users to private channel
-│       │   ├── LiveCallBanner.jsx         # Live call in progress banner
-│       │   ├── LocationMessage.jsx        # GPS location map card
-│       │   ├── MembersModal.jsx           # Channel members list
-│       │   ├── PageLoader.jsx             # Full-screen loading state
-│       │   ├── PeoplePanel.jsx            # User search and friend requests
-│       │   ├── PinnedMessageBanner.jsx    # Cycling pinned message banner
-│       │   ├── PinnedMessagesModal.jsx    # All pinned messages list
-│       │   ├── PollMessage.jsx            # Poll card with real-time voting
-│       │   ├── ProfileModal.jsx           # User profile modal
-│       │   ├── PublicChannelJoin.jsx      # Search and join public channels
-│       │   ├── PublicChannelPreview.jsx   # Public channel search result
-│       │   ├── ReactionDisplay.jsx        # Emoji reaction row
-│       │   ├── ReplyBox.jsx               # Reply preview component
-│       │   └── UsersList.jsx              # Users list with presence
-│       ├── hooks/
-│       │   └── useStreamChat.js           # Stream Chat singleton connection hook
-│       ├── lib/
-│       │   ├── api.js                     # All Axios API call functions
-│       │   ├── axios.js                   # Axios instance with Clerk auth headers
-│       │   └── callMessages.js            # Call message parsing and localStorage utils
-│       ├── pages/
-│       │   ├── AuthPage.jsx               # Sign in / sign up landing page
-│       │   ├── CallPage.jsx               # Video call room
-│       │   ├── HomePage.jsx               # Main chat layout (WhatsApp-style mobile nav)
-│       │   ├── ProfilePage.jsx            # Account settings — name, avatar, password
-│       │   └── PublicChannelPage.jsx      # Public channel shareable preview
-│       ├── providers/
-│       │   └── AuthProvider.jsx           # Clerk auth wrapper
-│       └── styles/                        # CSS theme files and layout overrides
-│
-└── backend/
+├── backend/
+│   ├── src/
+│   │   ├── config/       # DB, Stream, Inngest, env config
+│   │   ├── controllers/  # chat and friend logic
+│   │   ├── middleware/   # Clerk auth middleware
+│   │   ├── models/       # User and FriendRequest schemas
+│   │   └── routes/       # API route definitions
+│   └── instrument.mjs    # Sentry backend init
+└── frontend/
     └── src/
-        ├── config/
-        │   ├── db.js                      # MongoDB connection
-        │   ├── env.js                     # Environment variable loader
-        │   ├── inngest.js                 # Background jobs — user sync on Clerk events
-        │   └── stream.js                  # Stream Chat server-side client
-        ├── controllers/
-        │   ├── chat.controller.js         # All chat logic — token, channels, messages, calls
-        │   └── friend.controller.js       # Friend requests and user search
-        ├── middleware/
-        │   └── auth.middleware.js         # Clerk JWT verification
-        ├── models/
-        │   ├── friend.model.js            # FriendRequest schema (sender, receiver, status)
-        │   └── user.model.js              # User schema (clerkId, email, name, image)
-        └── routes/
-            ├── chat.route.js              # Chat API routes
-            └── friend.route.js            # Friend API routes
+        ├── components/   # All UI components
+        ├── hooks/        # useStreamChat
+        ├── lib/          # API helpers, axios instance
+        ├── pages/        # HomePage, AuthPage, CallPage, etc.
+        ├── providers/    # AuthProvider
+        └── styles/       # CSS modules and theme files
 ```
-
----
-
-## API Reference
-
-### Chat
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/chat/token` | Get Stream Chat user token |
-| GET | `/api/chat/channels/public/:channelId` | Search public channel by name or ID |
-| POST | `/api/chat/channels/:channelId/join` | Join a public channel |
-| POST | `/api/chat/channels/:channelId/invite` | Invite users to a private channel |
-| DELETE | `/api/chat/channels/:channelId/members/:memberId` | Remove a member (owner only) |
-| POST | `/api/chat/channels/:channelId/members/:memberId/ban` | Ban a member (owner only) |
-| DELETE | `/api/chat/channels/:channelId/members/:memberId/ban` | Unban a member (owner only) |
-| POST | `/api/chat/messages/:messageId/pin` | Pin a message |
-| POST | `/api/chat/messages/:messageId/unpin` | Unpin a message |
-| POST | `/api/chat/messages/:messageId/vote` | Vote on a poll |
-| GET | `/api/chat/channels/:channelId/call-history` | Get call history for a channel |
-
-### Friends
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/friends` | List accepted friends |
-| GET | `/api/friends/requests` | Get pending incoming friend requests |
-| GET | `/api/friends/sent` | Get sent friend requests |
-| GET | `/api/friends/search` | Search users by name or email |
-| POST | `/api/friends/request/:targetUserId` | Send a friend request |
-| POST | `/api/friends/accept/:requestId` | Accept a friend request |
-| POST | `/api/friends/reject/:requestId` | Reject a friend request |
-| DELETE | `/api/friends/:friendId` | Remove a friend |
-
----
-
-## Background Jobs (Inngest)
-
-Inngest handles Clerk webhook events automatically:
-
-| Function | Trigger | Action |
-|----------|---------|--------|
-| `sync-user` | `clerk/user.created` | Creates user in MongoDB and upserts to Stream |
-| `delete-user-from-db` | `clerk/user.deleted` | Removes user from MongoDB and Stream |
-
----
-
-## Environment Variables
-
-### Frontend (`frontend/.env`)
-
-```env
-VITE_CLERK_PUBLISHABLE_KEY=
-VITE_STREAM_API_KEY=
-VITE_SENTRY_DSN=
-VITE_API_BASE_URL=http://localhost:5001/api
-```
-
-### Backend (`backend/.env`)
-
-```env
-PORT=5001
-MONGO_URI=
-NODE_ENV=development
-CLIENT_URL=http://localhost:5173
-CLERK_PUBLISHABLE_KEY=
-CLERK_SECRET_KEY=
-STREAM_API_KEY=
-STREAM_API_SECRET=
-SENTRY_DSN=
-INNGEST_EVENT_KEY=
-INNGEST_SIGNING_KEY=
-```
-
----
-
-## Getting Started
-
-```bash
-# 1. Clone and install
-cd backend && npm install
-cd ../frontend && npm install
-
-# 2. Configure environment variables
-cp backend/.env.example backend/.env
-cp frontend/.env.example frontend/.env
-# Fill in your keys in both .env files
-
-# 3. Start the backend (port 5001)
-cd backend && npm run dev
-
-# 4. Start the frontend in a separate terminal (port 5173)
-cd frontend && npm run dev
-```
-
-Open [http://localhost:5173](http://localhost:5173) in your browser.
 
 ---
 
 ## Deployment
 
-Both `frontend/` and `backend/` include `vercel.json` for Vercel deployment.
+Both frontend and backend include `vercel.json` for Vercel deployment.
 
-- Frontend: deploy as a Vite static site — set all `VITE_*` env vars in Vercel project settings
-- Backend: deploy as a serverless Node.js app — set all backend env vars in Vercel project settings
-- Make sure `CLIENT_URL` in the backend points to your deployed frontend URL
+- Frontend: deploy the `frontend/` folder as a Vite project
+- Backend: deploy the `backend/` folder as a serverless Node.js app
+
+Make sure to set all environment variables in your Vercel project settings.
 
 ---
 
-## UI Design Reference
-
-See [`UI-DESIGN-BRIEF.md`](./UI-DESIGN-BRIEF.md) for the complete visual and functional specification — layout diagrams, color tokens, typography, animation inventory, and full component breakdowns.
+<div align="center">
+  Built with Stream, Clerk, Inngest, and a lot of purple.
+</div>
