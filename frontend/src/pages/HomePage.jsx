@@ -666,14 +666,9 @@ const HomePage = () => {
                       <img src="/logo-2.png" alt="TeamOS" style={{ width: 34, height: 34, borderRadius: 10, objectFit: "cover", boxShadow: "0 0 12px rgba(109,40,217,.5)" }} />
                       <span style={{ fontSize: 17, fontWeight: 800, letterSpacing: "-.02em", background: "linear-gradient(135deg,#c4b5fd,#a78bfa)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>TeamOS</span>
                     </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      <button onClick={() => signOut()} title="Log out" style={{ width: 34, height: 34, borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(239,68,68,.1)", border: "1px solid rgba(239,68,68,.25)", cursor: "pointer", color: "#f87171", flexShrink: 0, transition: "background .18s" }} onMouseEnter={e => e.currentTarget.style.background="rgba(239,68,68,.22)"} onMouseLeave={e => e.currentTarget.style.background="rgba(239,68,68,.1)"}>
-                        <LogOutIcon style={{ width: 15, height: 15 }} />
-                      </button>
-                      <button onClick={() => navigate("/profile")} style={{ width: 36, height: 36, borderRadius: "50%", padding: 0, border: "2px solid rgba(109,40,217,.4)", cursor: "pointer", overflow: "hidden", background: "linear-gradient(135deg,#6d28d9,#9333ea)", flexShrink: 0 }}>
-                        {user?.imageUrl ? <img src={user.imageUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} /> : <span style={{ color: "#fff", fontSize: 14, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", width: "100%", height: "100%" }}>{(user?.firstName || user?.username || "?")[0].toUpperCase()}</span>}
-                      </button>
-                    </div>
+                    <button onClick={() => navigate("/profile")} style={{ width: 36, height: 36, borderRadius: "50%", padding: 0, border: "2px solid rgba(109,40,217,.4)", cursor: "pointer", overflow: "hidden", background: "linear-gradient(135deg,#6d28d9,#9333ea)", flexShrink: 0 }}>
+                      {user?.imageUrl ? <img src={user.imageUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} /> : <span style={{ color: "#fff", fontSize: 14, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", width: "100%", height: "100%" }}>{(user?.firstName || user?.username || "?")[0].toUpperCase()}</span>}
+                    </button>
                   </div>
                   {/* Tabs */}
                   <div className="sidebar-tabs">
@@ -744,9 +739,6 @@ const HomePage = () => {
                         <span style={{ fontSize: 16, fontWeight: 800, letterSpacing: "-.02em", background: "linear-gradient(135deg,#c4b5fd,#a78bfa,#818cf8)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", whiteSpace: "nowrap" }}>TeamOS</span>
                       </div>
                       <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                        <button onClick={() => signOut()} title="Log out" style={{ width: 30, height: 30, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(239,68,68,.1)", border: "1px solid rgba(239,68,68,.25)", cursor: "pointer", color: "#f87171", flexShrink: 0, transition: "background .18s" }} onMouseEnter={e => e.currentTarget.style.background="rgba(239,68,68,.22)"} onMouseLeave={e => e.currentTarget.style.background="rgba(239,68,68,.1)"}>
-                          <LogOutIcon style={{ width: 14, height: 14 }} />
-                        </button>
                         <button onClick={() => navigate("/profile")} title="My Profile" style={{ width: 34, height: 34, borderRadius: "50%", padding: 0, border: "2px solid rgba(109,40,217,.4)", cursor: "pointer", overflow: "hidden", background: "linear-gradient(135deg,#6d28d9,#9333ea)", flexShrink: 0, transition: "border-color .18s,box-shadow .18s" }} onMouseEnter={e => { e.currentTarget.style.borderColor = "rgba(147,51,234,.8)"; e.currentTarget.style.boxShadow = "0 0 14px rgba(109,40,217,.5)"; }} onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(109,40,217,.4)"; e.currentTarget.style.boxShadow = "none"; }}>
                           {user?.imageUrl ? <img src={user.imageUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} /> : <span style={{ color: "#fff", fontSize: 13, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", width: "100%", height: "100%" }}>{(user?.firstName || user?.username || "?")[0].toUpperCase()}</span>}
                         </button>
@@ -773,6 +765,21 @@ const HomePage = () => {
                       )}
                       {activeTab === "channels" && <ChannelsPanel chatClient={chatClient} activeChannel={activeChannel} setActiveChannel={selectChannel} onCreateChannel={() => setIsCreateModalOpen(true)} onClose={() => {}} />}
                       {activeTab === "people" && <PeoplePanel />}
+                    </div>
+                    {/* ── Sidebar bottom: user info + logout ── */}
+                    <div style={{ flexShrink: 0, borderTop: "1px solid rgba(109,40,217,.15)", padding: "10px 12px", display: "flex", alignItems: "center", gap: 10, background: "rgba(8,8,16,.6)" }}>
+                      <button onClick={() => navigate("/profile")} title="My Profile" style={{ display: "flex", alignItems: "center", gap: 9, flex: 1, minWidth: 0, background: "none", border: "none", cursor: "pointer", padding: 0, textAlign: "left" }}>
+                        <div style={{ width: 32, height: 32, borderRadius: "50%", overflow: "hidden", flexShrink: 0, border: "2px solid rgba(109,40,217,.4)", background: "linear-gradient(135deg,#6d28d9,#9333ea)" }}>
+                          {user?.imageUrl ? <img src={user.imageUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} /> : <span style={{ color: "#fff", fontSize: 12, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", width: "100%", height: "100%" }}>{(user?.firstName || user?.username || "?")[0].toUpperCase()}</span>}
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <p style={{ fontSize: 13, fontWeight: 700, color: "#f1f0ff", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{[user?.firstName, user?.lastName].filter(Boolean).join(" ") || user?.username || "Me"}</p>
+                          <p style={{ fontSize: 11, color: "rgba(160,158,192,.4)", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{user?.primaryEmailAddress?.emailAddress || ""}</p>
+                        </div>
+                      </button>
+                      <button onClick={() => signOut()} title="Log out" style={{ width: 32, height: 32, borderRadius: 9, display: "flex", alignItems: "center", justifyContent: "center", background: "none", border: "1px solid rgba(255,255,255,.08)", cursor: "pointer", color: "rgba(160,158,192,.5)", flexShrink: 0, transition: "all .18s" }} onMouseEnter={e => { e.currentTarget.style.background="rgba(239,68,68,.12)"; e.currentTarget.style.borderColor="rgba(239,68,68,.3)"; e.currentTarget.style.color="#f87171"; }} onMouseLeave={e => { e.currentTarget.style.background="none"; e.currentTarget.style.borderColor="rgba(255,255,255,.08)"; e.currentTarget.style.color="rgba(160,158,192,.5)"; }}>
+                        <LogOutIcon style={{ width: 14, height: 14 }} />
+                      </button>
                     </div>
                   </div>
                 </aside>

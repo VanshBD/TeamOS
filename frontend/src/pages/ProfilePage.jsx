@@ -4,7 +4,7 @@ import { useNavigate } from "react-router";
 import {
   ArrowLeftIcon, CameraIcon, UserIcon, MailIcon,
   LockIcon, TrashIcon, CheckIcon, AlertTriangleIcon,
-  EyeIcon, EyeOffIcon, Loader2Icon,
+  EyeIcon, EyeOffIcon, Loader2Icon, LogOutIcon,
 } from "lucide-react";
 
 /* ─── tiny helpers ─────────────────────────────────────── */
@@ -346,6 +346,20 @@ export default function ProfilePage() {
                 Update Password
               </Btn>
               <Msg text={pwMsg} />
+            </Card>
+
+            {/* ── Sign out ── */}
+            <Card>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <div>
+                  <p style={{ fontSize: 14, fontWeight: 700, color: "#f1f0ff", margin: "0 0 3px" }}>Sign Out</p>
+                  <p style={{ fontSize: 12, color: "rgba(160,158,192,.45)", margin: 0 }}>Sign out of your account on this device</p>
+                </div>
+                <Btn variant="ghost" onClick={() => signOut()} style={{ padding: "9px 16px", gap: 7, flexShrink: 0 }}>
+                  <LogOutIcon style={{ width: 14, height: 14 }} />
+                  Sign Out
+                </Btn>
+              </div>
             </Card>
 
             {/* ── Danger zone ── */}
