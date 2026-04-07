@@ -29,7 +29,18 @@ const CustomChannelHeader = ({ onBack }) => {
   const otherUser = Object.values(channel.state.members).find(
     (member) => member.user?.id !== user?.id
   );
-  const isDM = channel.data?.member_count === 2 && channel.data?.id?.includes("user_");
+  const isDM = !channel.data?.name && Object.keys(channel.state.members).length === 2;
+
+  // Resolve the other user's image — channel state may not have it, so fall back to a Stream query
+  const [otherUserImage, setOtherUserImage] = useState(otherUser?.user?.image || null);
+  useEffect(() => {
+    if (!isDM || !otherUser?.user?.id) return;
+    if (otherUser?.user?.image) { setOtherUserImage(otherUser.user.image); return; }
+    // image not in channel state — query Stream for the full user object
+    channel._client?.queryUsers({ id: { $eq: otherUser.user.id } }, {}, { limit: 1 })
+      .then(res => { if (res.users?.[0]?.image) setOtherUserImage(res.users[0].image); })
+      .catch(() => {});
+  }, [isDM, otherUser?.user?.id, otherUser?.user?.image]);
 
   const handleShowPinned = async () => {
     const channelState = await channel.query();
@@ -136,7 +147,7 @@ const CustomChannelHeader = ({ onBack }) => {
         <button
           className="ch-header__left"
           onClick={() => isDM
-            ? openFriendProfile({ id: otherUser?.user?.id, name: otherUser?.user?.name || otherUser?.user?.id, image: otherUser?.user?.image })
+            ? openFriendProfile({ id: otherUser?.user?.id, name: otherUser?.user?.name || otherUser?.user?.id, image: otherUserImage })
             : openChannelDetail()
           }
           title={isDM ? "View profile" : "Channel details"}
@@ -146,8 +157,13 @@ const CustomChannelHeader = ({ onBack }) => {
             ? <LockIcon className="ch-header__icon" />
             : <HashIcon className="ch-header__icon" />
           }
-          {isDM && otherUser?.user?.image && (
-            <img src={otherUser.user.image} alt="" className="ch-header__dm-avatar" />
+          {isDM && otherUserImage && (
+            <img src={otherUserImage} alt="" className="ch-header__dm-avatar" />
+          )}
+          {isDM && !otherUserImage && (
+            <div className="ch-header__dm-avatar ch-header__dm-avatar--placeholder">
+              {(otherUser?.user?.name || otherUser?.user?.id || "?")[0].toUpperCase()}
+            </div>
           )}
           <span className="ch-header__name">
             {isDM ? otherUser?.user?.name || otherUser?.user?.id : channel.data?.name || channel.data?.id}

@@ -69,6 +69,11 @@ const EnhancedMessage = () => {
   const { channel } = useChannelStateContext();
   const { setReplyingTo } = useContext(ReplyContext);
 
+  // Resolve user image: message.user.image may be missing — fall back to Stream's user cache
+  const userImage = message.user?.image
+    || client?.state?.users?.[message.user?.id]?.image
+    || null;
+
   const { isOwnMessage, formattedTime } = useMemo(() => {
     const isOwn = message.user?.id === client?.user?.id;
     const d = new Date(message.created_at);
@@ -108,8 +113,8 @@ const EnhancedMessage = () => {
     <div data-message-id={message.id} className={`msg-row group ${isOwnMessage ? "msg-row--own" : "msg-row--other"}`}>
       {!isOwnMessage && (
         <div className="msg-avatar">
-          {message.user?.image
-            ? <img src={message.user.image} alt="" className="msg-avatar__img" />
+          {userImage
+            ? <img src={userImage} alt="" className="msg-avatar__img" />
             : <div className="msg-avatar__placeholder">{(message.user?.name || "?")[0].toUpperCase()}</div>
           }
         </div>
@@ -190,8 +195,8 @@ const EnhancedMessage = () => {
       </div>
       {isOwnMessage && (
         <div className="msg-avatar">
-          {message.user?.image
-            ? <img src={message.user.image} alt="" className="msg-avatar__img" />
+          {userImage
+            ? <img src={userImage} alt="" className="msg-avatar__img" />
             : <div className="msg-avatar__placeholder">{(message.user?.name || "?")[0].toUpperCase()}</div>
           }
         </div>
@@ -220,6 +225,7 @@ const FriendProfilePanel = ({ friend, onClose, onFriendRemoved, chatClient, onNa
   const [showPinned, setShowPinned] = useState(false);
   const [confirmRemove, setConfirmRemove] = useState(false);
   const [confirmDeleteHistory, setConfirmDeleteHistory] = useState(false);
+  const [resolvedImage, setResolvedImage] = useState(friend.image || null);
 
   const dmChannelId = chatClient?.user?.id
     ? [chatClient.user.id, friend.id].sort().join("-").slice(0, 64)
@@ -231,7 +237,11 @@ const FriendProfilePanel = ({ friend, onClose, onFriendRemoved, chatClient, onNa
     (async () => {
       try {
         const presRes = await chatClient.queryUsers({ id: { $eq: friend.id } }, {}, { presence: true });
-        if (!cancelled) setIsOnline(presRes.users?.[0]?.online ?? false);
+        if (!cancelled) {
+          setIsOnline(presRes.users?.[0]?.online ?? false);
+          // Resolve image from Stream if not passed in
+          if (!friend.image && presRes.users?.[0]?.image) setResolvedImage(presRes.users[0].image);
+        }
         if (dmChannelId) {
           const dmCh = chatClient.channel("messaging", dmChannelId, { members: [chatClient.user.id, friend.id] });
           await dmCh.watch();
@@ -278,7 +288,7 @@ const FriendProfilePanel = ({ friend, onClose, onFriendRemoved, chatClient, onNa
     } catch { toast.error("Failed to remove friend"); }
   };
 
-  const avatar = friend.image;
+  const avatar = resolvedImage;
 
   return (
     <div style={{ flex: "1 1 0", minWidth: 0, height: "100%", display: "flex", flexDirection: "column", overflow: "hidden", background: "#0f1117" }}>
@@ -454,6 +464,8 @@ const HomePage = () => {
     setActiveChannel(ch);
     setFriendProfileData(null);
     if (isMobile) setMobileView("chat");
+    // Mark as read immediately so the badge clears right away
+    try { ch.markRead(); } catch { /* silent */ }
   };
 
   // Back button on mobile — go back to list
@@ -522,21 +534,23 @@ const HomePage = () => {
     const computeUnread = () => {
       let dms = 0, channels = 0;
       Object.values(chatClient.activeChannels || {}).forEach((ch) => {
-        // Count only real unread messages — skip __CALL__ system messages
+        // Skip the currently active/open channel — it's being read right now
+        if (activeChannel && ch.id === activeChannel.id) return;
+
+        // Use Stream's built-in countUnread, but exclude __CALL__ system messages
         const messages = Object.values(ch.state?.messages || {});
         const lastRead = ch.state?.read?.[chatClient.userID]?.last_read;
         const lastReadTime = lastRead ? new Date(lastRead).getTime() : 0;
 
         const realUnread = messages.filter((m) => {
           if (!m?.created_at) return false;
-          if (m.user?.id === chatClient.userID) return false; // own messages
-          if (typeof m.text === "string" && m.text.startsWith("__CALL__")) return false; // system call msgs
+          if (m.user?.id === chatClient.userID) return false;
+          if (typeof m.text === "string" && m.text.startsWith("__CALL__")) return false;
           return new Date(m.created_at).getTime() > lastReadTime;
         }).length;
 
         if (!realUnread) return;
 
-        // Reliable DM detection: private=false is a channel; member_count===2 with no name is a DM
         const data = ch.data || {};
         const isDM = !data.name && Object.keys(ch.state?.members || {}).length === 2;
         if (isDM) dms += realUnread;
@@ -548,15 +562,18 @@ const HomePage = () => {
 
     computeUnread();
 
-    const events = ["message.new", "notification.message_new", "notification.mark_read", "channel.updated"];
+    const events = ["message.new", "notification.message_new", "notification.mark_read", "message.read", "channel.updated"];
     const handlers = events.map((ev) => {
       const h = () => computeUnread();
       chatClient.on(ev, h);
       return { ev, h };
     });
 
+    // Also recompute immediately whenever the active channel changes
+    computeUnread();
+
     return () => handlers.forEach(({ ev, h }) => chatClient.off(ev, h));
-  }, [chatClient]);
+  }, [chatClient, activeChannel]);
 
   if (error) return <p style={{ padding: 32, color: "#ef4444" }}>Something went wrong.</p>;
   if (isLoading || !chatClient) return <PageLoader />;
