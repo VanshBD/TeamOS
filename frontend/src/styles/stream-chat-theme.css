@@ -1598,12 +1598,12 @@
   .chat-main { border-radius: 0; flex: 1; min-height: 0; }
   .team-channel-list { max-height: 45vh; }
   .team-channel-list__content { overflow-y: auto; }
-  .msg-content { max-width: 85%; }
+  .msg-content { max-width: calc(100% - 60px); }
 }
 
 @media (max-width: 480px) {
   .msg-row { padding: 2px 8px; }
-  .msg-content { max-width: 88%; }
+  .msg-content { max-width: calc(100% - 50px); }
   .msg-bubble { padding: 7px 10px 5px; }
   .msg-text { font-size: 13px; }
   .inline-reply-box { max-width: 100%; }

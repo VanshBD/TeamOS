@@ -632,10 +632,10 @@ const HomePage = () => {
         .app-chat .str-chat__message-input { display: none !important; }
         .app-chat .str-chat__ul { width: 100% !important; max-width: 100% !important; list-style: none !important; margin: 0 !important; padding: 8px 0 !important; }
         .app-chat .str-chat__li { width: 100% !important; max-width: 100% !important; padding: 0 !important; overflow: hidden !important; }
-        .msg-row { display: flex !important; align-items: flex-end !important; gap: 8px !important; padding: 3px 16px !important; width: 100% !important; max-width: 100% !important; box-sizing: border-box !important; overflow: hidden !important; }
+        .msg-row { display: flex !important; align-items: flex-end !important; gap: 8px !important; padding: ${isMobile ? "3px 8px" : "3px 16px"} !important; width: 100% !important; max-width: 100% !important; box-sizing: border-box !important; overflow: hidden !important; }
         .msg-row--own { flex-direction: row-reverse !important; }
         .msg-row--other { flex-direction: row !important; }
-        .msg-content { max-width: ${isMobile ? "85%" : "min(65%, 520px)"} !important; min-width: 0 !important; display: flex !important; flex-direction: column !important; }
+        .msg-content { max-width: ${isMobile ? "calc(100% - 40px)" : "min(65%, 520px)"} !important; min-width: 0 !important; display: flex !important; flex-direction: column !important; }
         .msg-content--own { align-items: flex-end !important; }
         .ch-header__hamburger { display: ${isMobile ? "flex" : "none"} !important; }
         .chat-input-wrapper { flex-shrink: 0 !important; margin: 0 12px 12px !important; box-sizing: border-box !important; }
