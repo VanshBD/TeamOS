@@ -594,7 +594,7 @@ const HomePage = () => {
 
   const shellStyle = {
     position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
-    width: "100vw", height: "100vh",
+    width: "100vw", height: "100dvh",
     display: "flex", flexDirection: "row",
     overflow: "hidden", background: "#080810", zIndex: 0,
   };
@@ -638,7 +638,7 @@ const HomePage = () => {
         .msg-content { max-width: ${isMobile ? "calc(100% - 40px)" : "min(65%, 520px)"} !important; min-width: 0 !important; display: flex !important; flex-direction: column !important; }
         .msg-content--own { align-items: flex-end !important; }
         .ch-header__hamburger { display: ${isMobile ? "flex" : "none"} !important; }
-        .chat-input-wrapper { flex-shrink: 0 !important; margin: 0 12px 12px !important; box-sizing: border-box !important; }
+        .chat-input-wrapper { flex-shrink: 0 !important; margin: 0 12px 12px !important; padding-bottom: env(safe-area-inset-bottom) !important; box-sizing: border-box !important; }
         .sidebar-scroll-area { scrollbar-width: none !important; }
         .sidebar-scroll-area::-webkit-scrollbar { display: none !important; width: 0 !important; }
         .sidebar-scroll-area .str-chat__channel-list, .sidebar-scroll-area .str-chat, .sidebar-scroll-area .str-chat__channel-list-react { height: auto !important; min-height: 0 !important; overflow: visible !important; flex: none !important; }

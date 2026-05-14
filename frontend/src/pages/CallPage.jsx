@@ -142,7 +142,7 @@ const CallPage = () => {
 
   if (!isLoaded || isConnecting) {
     return (
-      <div style={{ height: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "#080810", gap: 16 }}>
+      <div style={{ height: "100dvh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "#080810", gap: 16 }}>
         <div style={{ position: "relative", width: 56, height: 56 }}>
           <div style={{ position: "absolute", inset: 0, borderRadius: "50%", border: "2px solid transparent", borderTopColor: "#9333ea", borderRightColor: "#6d28d9", animation: "spin .8s linear infinite" }} />
           <div style={{ position: "absolute", inset: 8, borderRadius: "50%", background: "linear-gradient(135deg,#6d28d9,#2563eb)", boxShadow: "0 0 20px rgba(109,40,217,.5)" }} />
@@ -155,7 +155,7 @@ const CallPage = () => {
 
   if (!client || !call) {
     return (
-      <div style={{ height: "100vh", display: "flex", flexDirection: "column", gap: 16, alignItems: "center", justifyContent: "center", background: "#080810" }}>
+      <div style={{ height: "100dvh", display: "flex", flexDirection: "column", gap: 16, alignItems: "center", justifyContent: "center", background: "#080810" }}>
         <p style={{ color: "rgba(241,240,255,.7)", fontSize: 14, margin: 0 }}>Could not initialize call. Please refresh or try again.</p>
         <button onClick={closeTab} style={{ padding: "10px 20px", background: "linear-gradient(135deg,#dc2626,#b91c1c)", color: "#fff", border: "none", borderRadius: 10, cursor: "pointer", fontSize: 13, fontWeight: 600 }}>Close</button>
       </div>
@@ -163,7 +163,7 @@ const CallPage = () => {
   }
 
   return (
-    <div className="h-screen flex flex-col bg-gray-900">
+    <div className="h-dvh flex flex-col bg-gray-900">
       <StreamVideo client={client}>
         <StreamCall call={call}>
           <CallContent
