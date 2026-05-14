@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
+import { ListSkeleton } from "./SkeletonLoader";
 import {
   searchUsers,
   sendFriendRequest,
@@ -179,7 +180,7 @@ const PeoplePanel = () => {
               </span>
             )}
           </div>
-          {loadingRequests && <div className="sidebar-status-msg">Loading…</div>}
+          {loadingRequests && <ListSkeleton count={3} type="user" />}
           {!loadingRequests && incomingRequests.length === 0 && (
             <div className="sidebar-status-msg">No pending requests</div>
           )}

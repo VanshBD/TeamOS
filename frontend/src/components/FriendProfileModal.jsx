@@ -4,6 +4,7 @@ import { useSearchParams } from "react-router";
 import { XIcon, PinIcon, HashIcon, MessageSquareIcon, UserMinus2Icon, AlertTriangleIcon, TrashIcon } from "lucide-react";
 import { removeFriend } from "../lib/api";
 import toast from "react-hot-toast";
+import { ProfileStatsSkeleton } from "./SkeletonLoader";
 
 /* ── helpers ── */
 const fmtBytes = (bytes) => {
@@ -254,7 +255,7 @@ const FriendProfileModal = ({ friend, onClose, onFriendRemoved }) => {
             </div>
 
             {loading ? (
-              <div style={{ textAlign: "center", padding: "32px 0", color: "rgba(160,158,192,.4)", fontSize: 13 }}>Loading…</div>
+              <ProfileStatsSkeleton />
             ) : (
               <>
                 {/* Stats row */}

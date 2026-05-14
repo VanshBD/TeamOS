@@ -4,6 +4,7 @@ import React, { useEffect, useState, useCallback, useMemo, createContext, useCon
 import { useSearchParams } from "react-router";
 import { useStreamChat } from "../hooks/useStreamChat";
 import PageLoader from "../components/PageLoader";
+import { ProfileStatsSkeleton } from "../components/SkeletonLoader";
 import toast from "react-hot-toast";
 import ReactionDisplay from "../components/ReactionDisplay";
 import { pinMessageApi, unpinMessageApi } from "../lib/api";
@@ -346,7 +347,7 @@ const FriendProfilePanel = ({ friend, onClose, onFriendRemoved, chatClient, onNa
         </div>
 
         {loading ? (
-          <div style={{ textAlign:"center", padding:"32px 0", color:"rgba(160,158,192,.4)", fontSize:13 }}>Loading…</div>
+          <ProfileStatsSkeleton />
         ) : (
           <>
             {/* Stats */}

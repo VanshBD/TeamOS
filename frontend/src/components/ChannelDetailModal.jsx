@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { ListSkeleton } from "./SkeletonLoader";
 import { useChannelStateContext, useChatContext } from "stream-chat-react";
 import { useSearchParams } from "react-router";
 import { useUser } from "@clerk/clerk-react";
@@ -372,7 +373,7 @@ const ChannelDetailModal = ({ onClose }) => {
             )}
 
             {loading ? (
-              <div style={{ textAlign: "center", padding: "32px 0", color: "rgba(160,158,192,.4)", fontSize: 13 }}>Loading…</div>
+              <ListSkeleton count={4} type="user" />
             ) : (
               <>
                 {/* Stats */}

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { ListSkeleton } from "./SkeletonLoader";
 import { useChatContext } from "stream-chat-react";
 import { XIcon, UserPlusIcon } from "lucide-react";
 import toast from "react-hot-toast";
@@ -61,7 +62,7 @@ const InviteModal = ({ channel, onClose }) => {
         </div>
 
         <div style={S.body}>
-          {loading && <p style={{ color:"rgba(160,158,192,.5)",fontSize:13,textAlign:"center",padding:"20px 0" }}>Loading users…</p>}
+          {loading && <ListSkeleton count={4} type="user" />}
           {error && <p style={{ color:"#fca5a5",fontSize:12,marginBottom:8 }}>{error}</p>}
           {!loading && users.length === 0 && <p style={{ color:"rgba(160,158,192,.5)",fontSize:13,textAlign:"center",padding:"20px 0" }}>No users to invite</p>}
           {users.map(user => {

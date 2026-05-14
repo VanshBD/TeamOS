@@ -7,6 +7,7 @@ import toast from "react-hot-toast";
 import { getStreamToken } from "../lib/api";
 import { StreamChat } from "stream-chat";
 import { buildCallEndedText, buildCallMissedText, parseCallMessage } from "../lib/callMessages";
+import PageLoader from "../components/PageLoader";
 
 const STREAM_CHAT_API_KEY = import.meta.env.VITE_STREAM_API_KEY;
 
@@ -141,16 +142,7 @@ const CallPage = () => {
   }, [tokenData?.token, user?.id, callId, channelId, isCaller]);
 
   if (!isLoaded || isConnecting) {
-    return (
-      <div style={{ height: "100dvh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "#080810", gap: 16 }}>
-        <div style={{ position: "relative", width: 56, height: 56 }}>
-          <div style={{ position: "absolute", inset: 0, borderRadius: "50%", border: "2px solid transparent", borderTopColor: "#9333ea", borderRightColor: "#6d28d9", animation: "spin .8s linear infinite" }} />
-          <div style={{ position: "absolute", inset: 8, borderRadius: "50%", background: "linear-gradient(135deg,#6d28d9,#2563eb)", boxShadow: "0 0 20px rgba(109,40,217,.5)" }} />
-        </div>
-        <p style={{ color: "rgba(160,158,192,.8)", fontSize: 14, fontWeight: 500, margin: 0 }}>Connecting to call…</p>
-        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-      </div>
-    );
+    return <PageLoader text="Connecting to call…" />;
   }
 
   if (!client || !call) {

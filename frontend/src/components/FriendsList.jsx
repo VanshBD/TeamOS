@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router";
 import { useChatContext } from "stream-chat-react";
 import { getFriends } from "../lib/api";
 import toast from "react-hot-toast";
+import { ListSkeleton } from "./SkeletonLoader";
 
 const isClerkDefault = (url) => {
   if (!url) return true;
@@ -77,7 +78,7 @@ const FriendsList = ({ activeChannel, onClose, onSelectChannel }) => {
     }
   };
 
-  if (isLoading) return <div className="sidebar-status-msg">Loading friends…</div>;
+  if (isLoading) return <ListSkeleton count={5} type="user" />;
   if (!friends.length)
     return (
       <div className="sidebar-status-msg" style={{ padding: "16px 14px", lineHeight: 1.5 }}>

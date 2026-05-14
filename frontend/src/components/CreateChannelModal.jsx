@@ -4,6 +4,7 @@ import { useChatContext } from "stream-chat-react";
 import * as Sentry from "@sentry/react";
 import toast from "react-hot-toast";
 import { AlertCircleIcon, HashIcon, LockIcon, UsersIcon, XIcon, LinkIcon, CopyIcon } from "lucide-react";
+import { ListSkeleton } from "./SkeletonLoader";
 
 const CreateChannelModal = ({ onClose }) => {
   const [channelName, setChannelName] = useState("");
@@ -330,7 +331,7 @@ const CreateChannelModal = ({ onClose }) => {
 
               <div className="members-list">
                 {loadingUsers ? (
-                  <p>Loading users...</p>
+                  <ListSkeleton count={4} type="user" />
                 ) : users.length === 0 ? (
                   <p>No users found</p>
                 ) : (
