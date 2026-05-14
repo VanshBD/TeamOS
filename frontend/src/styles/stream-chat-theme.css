@@ -2096,7 +2096,6 @@
 
 @media (max-width: 480px) {
   .sidebar { width: 100%; }
-  .msg-content { max-width: 90%; }
   .msg-row { padding: 2px 8px; }
 }
 

@@ -774,12 +774,10 @@ body {
   .sidebar__close-btn { display: flex !important; }
   .mobile-topbar { display: flex !important; }
   .chat-main { width: 100% !important; }
-  .msg-content { max-width: 85% !important; }
 }
 @media (max-width: 480px) {
   .sidebar { width: 100% !important; min-width: 100% !important; max-width: 100% !important; }
   .msg-row { padding: 2px 8px !important; }
-  .msg-content { max-width: 90% !important; }
   .emoji-dropdown { position: fixed !important; bottom: 70px !important; left: 8px !important; right: 8px !important; width: auto !important; }
 }
 
